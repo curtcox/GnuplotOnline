@@ -7,7 +7,7 @@ const GnuplotCore = (() => {
     const dimension = (n, fallback) => Number.isFinite(+n) ? Math.max(100, Math.min(4096, Math.round(+n))) : fallback;
     return { width: dimension(input.width, 800), height: dimension(input.height, 600),
       background: input.background === 'transparent' ? 'transparent' : 'white',
-      font: String(input.font || 'sans,12'), fontscale: Math.max(.1, Math.min(5, Number(input.fontscale) || 1)) };
+      font: String(input.font || 'sans-serif,12'), fontscale: Math.max(.1, Math.min(5, Number(input.fontscale) || 1)) };
   }
   function errors(stderr) {
     const result = [];
@@ -66,12 +66,18 @@ const GnuplotCore = (() => {
         const documents = text.match(/<svg\b[\s\S]*?<\/svg>/g);
         if (documents) { svg = documents.at(-1); pages = documents.length; }
       }
+      const stdoutDocuments = stdout.join('\n').match(/<svg\b[\s\S]*?<\/svg>/g);
+      if (!svg && stdoutDocuments) { svg = stdoutDocuments.at(-1); pages = stdoutDocuments.length; }
       const termMatches = [...script.matchAll(/(?:^|[;\n])\s*set\s+term(?:inal)?\s+([a-z0-9]+)/gi)];
       const terminal = termMatches.at(-1)?.[1]?.toLowerCase() || 'svg';
       if (terminal !== 'svg') svg = '';
       if (terminal === 'dumb' && !stdout.length) {
         const text = outputs.find(output => output.name === 'out.svg') || outputs[0];
         if (text) stdout.push(new TextDecoder().decode(text.bytes));
+      }
+      if (!outputs.length && terminal !== 'svg' && terminal !== 'dumb' && stdout.length) {
+        const extension = { postscript: 'ps', epslatex: 'tex', pict2e: 'tex', pstricks: 'tex', context: 'tex' }[terminal] || terminal;
+        outputs.push({ name: 'plot.' + extension, bytes: new TextEncoder().encode(stdout.join('\n')) });
       }
       return { svg, stdout: stdout.join('\n'), stderr: stderr.join('\n'), exitCode,
         terminal, outputs, pages, errors: errors(stderr.join('\n')), ms: performance.now() - start };

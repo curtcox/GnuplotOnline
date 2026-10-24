@@ -329,3 +329,26 @@ Each phase is one commit (or a few) on a branch, with a PR into `main`. Merging 
 - **Name casing.** The GitHub repo is `GnuplotOnline`, while the local folder and README say
   `GnuPlotOnline`. The site name is set to "Gnuplot Online" (gnuplot's own spelling), and URLs
   use the repo's casing.
+
+## Implementation status — 2026-10-24
+
+- [x] Vendored WASM, shared runner, worker/client and GitHub Pages workflow.
+- [x] Ace mode/autocomplete, live rendering, line diagnostics, splitter, preview controls and exports.
+- [x] Source/document links, shortener, QR display and SVG/PNG downloads.
+- [x] UTF-8 data upload/drop/edit/rename/remove, validation, local persistence and document sharing.
+- [x] HashBin document/store/panel, CID loading, OAuth restoration, quotes, saves and stale-load guards.
+- [x] Phone tabs/More layout, touch pan/pinch, custom sizing and touch controls.
+- [x] Sixteen original samples, searchable/tagged gallery, generated covers and fingerprint checks.
+- [x] Atomic offline precache, update/retry status, manifest and install icons.
+- [x] Node tests, cross-browser Playwright suite, CI, README and AGENTS.md.
+- [ ] User: register the HashBin application and replace the empty public client ID.
+
+The user requested direct commits/pushes on `main`, superseding the branch/PR phase
+workflow above. Pages was already configured with `build_type: workflow`.
+
+Implementation findings: the npm loader is ES module output, so the worker dynamically
+imports it rather than using importScripts on that file. PostScript support files were
+missing from npm and have been vendored separately with provenance. Some low-residual
+fits expose the upstream build's `Igamma` diagnostic; the limitation is documented and
+the original fitting sample is verified against this engine. The unmodified engine
+binaries remain from the exact pinned npm tarball.

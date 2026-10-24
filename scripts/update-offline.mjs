@@ -1,8 +1,8 @@
 import fs from 'node:fs/promises';
 import { createHash } from 'node:crypto';
 const root = new URL('../', import.meta.url);
-const directories = ['src','ace','vendor','examples','gallery/previews'];
-let assets = ['index.html','gallery.html','icon.svg','manifest.webmanifest','svg-pan-zoom.min.js','service-worker.js'];
+const directories = ['src','ace','vendor','examples','gallery/previews','icons'];
+let assets = ['index.html','gallery.html','icon.svg','manifest.webmanifest','svg-pan-zoom.min.js','service-worker.js','LICENSE-graphvizonline','LICENSE-svg-pan-zoom'];
 async function walk(directory) {
   for (const entry of await fs.readdir(new URL(directory+'/', root), { withFileTypes: true })) {
     const path = directory + '/' + entry.name;

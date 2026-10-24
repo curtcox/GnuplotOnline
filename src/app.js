@@ -239,10 +239,11 @@
   window.addEventListener('offline-before-reload', persist);
   async function loadUrl({ initial = false } = {}) {
     hashbin.cancelLoad();
+    const loadRevision = revision;
     try {
       const callback = initial ? await store.callback(location.search) : null;
       if (callback) {
-        if (callback.snapshot) apply(callback.snapshot);
+        if (callback.snapshot && loadRevision === revision) apply(callback.snapshot);
         const clean = new URL(location.href); for (const key of ['code','state','error','error_description']) clean.searchParams.delete(key); history.replaceState(null, '', clean);
         $('hashbin-status').textContent = callback.error || 'Connected to HashBin. Choose Save to HashBin to save.';
         refreshShare(); return;
