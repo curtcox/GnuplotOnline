@@ -14,3 +14,12 @@ To update: download an explicitly versioned npm tarball, verify its registry int
 copy the two files without editing, update this record, and run all engine/browser tests
 and `node scripts/render-gallery.mjs`. Keep `package.json` here so Node recognizes the
 upstream ES module. Our worker dynamically imports it; `importScripts` cannot load ES modules.
+
+## PostScript runtime support
+
+The npm package omits the prologue and encoding files needed by the PostScript and
+epslatex terminals. `PostScript/` contains unmodified files from gnuplot’s
+`branch-6-0-stable`, commit `1a5ec4af67a78ca1f45c44c73a8febe0bda9d6a7`, under `term/PostScript/`.
+They use gnuplot’s distribution terms; `aglfn.txt` carries its own Adobe notice.
+The runner mounts these at `/runtime/PostScript` and sets the loadpath with `-e`,
+so user script line numbers remain accurate.

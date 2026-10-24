@@ -1,5 +1,6 @@
 /** Shared runner, exercised in Node and inside the dedicated browser worker. */
 const GnuplotCore = (() => {
+  const SUPPORT_FILES = ['prologue.ps','utf-8.ps','8859-1.ps','8859-15.ps','8859-2.ps','8859-9.ps','cp1250.ps','cp1251.ps','cp1252.ps','cp437.ps','cp850.ps','cp852.ps','koi8r.ps','koi8u.ps','aglfn.txt'];
   const validName = name => /^[A-Za-z0-9._-]{1,64}$/.test(name) && !name.includes('..') && !['script.gp', 'out.svg', '.', '..'].includes(name);
   const quote = value => String(value).replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/[\r\n]/g, ' ');
   function options(input = {}) {
@@ -14,12 +15,18 @@ const GnuplotCore = (() => {
     for (const match of stderr.matchAll(regex)) result.push({ file: match[1], line: +match[2], message: match[3] });
     return result;
   }
-  async function create(factory, config = {}) {
+  async function create(factory, config = {}, supportFiles = null) {
+    if (supportFiles === null && typeof module !== 'undefined') {
+      const fs = await import('node:fs/promises');
+      supportFiles = Object.fromEntries(await Promise.all(SUPPORT_FILES.map(async name => [name, await fs.readFile(__dirname + '/../vendor/gnuplot/PostScript/' + name)])));
+    }
     let stdout = [], stderr = [];
     const engine = await factory({ noInitialRun: true, noFSInit: true,
       print: text => stdout.push(text), printErr: text => stderr.push(text), ...config });
     const FS = engine.FS;
     FS.init(() => null, null, null);
+    FS.mkdir('/runtime'); FS.mkdir('/runtime/PostScript');
+    for (const [name, bytes] of Object.entries(supportFiles || {})) FS.writeFile('/runtime/PostScript/' + name, bytes);
     FS.mkdir('/work');
     FS.chdir('/work');
     function clear(path) {
@@ -41,7 +48,7 @@ const GnuplotCore = (() => {
       stdout = []; stderr = [];
       const snapshot = Uint8Array.from(engine.HEAPU8);
       const bg = settings.background === 'transparent' ? '' : " background rgb 'white'";
-      const setup = `set term svg size ${settings.width},${settings.height} dynamic enhanced${bg} font '${quote(settings.font)}' fontscale ${settings.fontscale}; set output 'out.svg'`;
+      const setup = `set loadpath '/runtime/PostScript'; set term svg size ${settings.width},${settings.height} dynamic enhanced${bg} font '${quote(settings.font)}' fontscale ${settings.fontscale}; set output 'out.svg'`;
       let exitCode = 0;
       try { exitCode = engine.callMain(['-e', setup, 'script.gp']); }
       catch (error) { if (typeof error.status === 'number') exitCode = error.status; else throw error; }
@@ -71,7 +78,7 @@ const GnuplotCore = (() => {
     }
     return { run };
   }
-  return { create, options, errors, validName };
+  return { create, options, errors, validName, SUPPORT_FILES };
 })();
 if (typeof module !== 'undefined') module.exports = GnuplotCore;
 else globalThis.GnuplotCore = GnuplotCore;

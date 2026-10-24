@@ -11,5 +11,8 @@ test('SVG, data blocks, files, diagnostics and repeat runs use the real engine',
   assert.equal(error.errors[0]?.line, 2);
   assert.equal(error.errors[0]?.file, 'script.gp');
   assert.match(runner.run('set term dumb\nset output\nplot x').stdout, /\+/);
+  const postscript = runner.run("set term postscript\nset output 'figure.ps'\nplot x");
+  assert.deepEqual(postscript.errors, []);
+  assert.ok(postscript.outputs.find(file => file.name === 'figure.ps').bytes.length > 10000);
   for (let i = 0; i < 50; i++) assert.match(runner.run(`plot x+${i}`).svg, /<svg/);
 });

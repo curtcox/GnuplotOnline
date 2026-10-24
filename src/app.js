@@ -42,6 +42,10 @@
   }
   function mountSvg(svg) {
     pan?.destroy(); pan = null; $('preview').innerHTML = svg;
+    initPan();
+  }
+  function initPan() {
+    if (!$('preview').getBoundingClientRect().width || !$('preview').getBoundingClientRect().height || !$('preview').querySelector('svg')) return;
     pan = svgPanZoom($('preview').querySelector('svg'), { zoomEnabled: true, controlIconsEnabled: false, fit: true, center: true,
       minZoom: .1, maxZoom: 40, preventMouseEventsDefault: true });
   }
@@ -88,7 +92,7 @@
   function changed() {
     if (applying) return;
     revision++; client.cancel(); hashbin.cancelLoad(); shareClient.cancel(); saved = null;
-    $('share-status').textContent = ''; $('cancel').hidden = true;
+    $('share-status').textContent = ''; $('cancel').hidden = true; $('status').textContent = 'Waiting for edits…';
     clearTimeout(persistTimer);
     persistTimer = setTimeout(() => { persist(); refreshShare({ address: true }); }, 180);
     scheduler.schedule({ detect: false });
@@ -124,7 +128,12 @@
   for (const id of ['width', 'height', 'background']) $(id).onchange = () => { settings = GnuplotCore.options({ ...settings, width: $('width').value, height: $('height').value, background: $('background').value }); syncOptions(); changed(); };
   $('hide-editor').onclick = () => { document.body.classList.add('editor-hidden'); $('show-editor').hidden = false; resize(); };
   $('show-editor').onclick = () => { document.body.classList.remove('editor-hidden'); $('show-editor').hidden = true; resize(); };
-  const resize = () => { editor.resize(); if (pan) { pan.resize(); pan.fit(); pan.center(); } };
+  const resize = () => {
+    editor.resize();
+    if (!$('preview').getBoundingClientRect().width || !$('preview').getBoundingClientRect().height) return;
+    if (!pan) initPan();
+    else { pan.resize(); pan.fit(); pan.center(); }
+  };
   let drag = false;
   $('splitter').onpointerdown = event => { drag = true; $('splitter').setPointerCapture(event.pointerId); };
   $('splitter').onpointermove = event => { if (!drag) return; const rect = document.querySelector('.workspace').getBoundingClientRect(); setSplit((event.clientX - rect.left) / rect.width * 100); };
@@ -136,7 +145,7 @@
   for (const tab of ['preview', 'code']) $('tab-' + tab).onclick = () => { document.body.dataset.tab = tab; for (const name of ['preview', 'code']) $('tab-' + name).setAttribute('aria-selected', name === tab); resize(); if (tab === 'code') editor.focus(); };
   $('more').onclick = () => { const open = document.body.classList.toggle('more-open'); $('more').setAttribute('aria-expanded', open); resize(); };
   $('fit').onclick = () => { pan?.resize(); pan?.fit(); pan?.center(); };
-  $('actual').onclick = () => { if (pan) { pan.zoom(1 / pan.getSizes().realZoom); pan.center(); } };
+  $('actual').onclick = () => { if (pan) { pan.zoom(pan.getZoom() / pan.getSizes().realZoom); pan.center(); } };
   $('zoom-in').onclick = () => pan?.zoomIn(); $('zoom-out').onclick = () => pan?.zoomOut();
   // Native Pointer Events provide touch pan and pinch on top of svg-pan-zoom's mouse support.
   const pointers = new Map(); let gesture = null;
