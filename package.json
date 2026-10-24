@@ -1,0 +1,14 @@
+{
+  "name": "gnuplot-online",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "test": "node --test tests/*.test.js",
+    "test:browser": "node tests/browser/all.cjs",
+    "previews": "node scripts/render-gallery.mjs",
+    "check": "node scripts/check.mjs"
+  },
+  "devDependencies": {
+    "playwright": "1.64.1"
+  }
+}

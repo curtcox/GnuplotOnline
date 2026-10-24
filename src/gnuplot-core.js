@@ -62,6 +62,10 @@ const GnuplotCore = (() => {
       const termMatches = [...script.matchAll(/(?:^|[;\n])\s*set\s+term(?:inal)?\s+([a-z0-9]+)/gi)];
       const terminal = termMatches.at(-1)?.[1]?.toLowerCase() || 'svg';
       if (terminal !== 'svg') svg = '';
+      if (terminal === 'dumb' && !stdout.length) {
+        const text = outputs.find(output => output.name === 'out.svg') || outputs[0];
+        if (text) stdout.push(new TextDecoder().decode(text.bytes));
+      }
       return { svg, stdout: stdout.join('\n'), stderr: stderr.join('\n'), exitCode,
         terminal, outputs, pages, errors: errors(stderr.join('\n')), ms: performance.now() - start };
     }

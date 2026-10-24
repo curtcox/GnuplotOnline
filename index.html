@@ -1,8 +1,37 @@
-<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Gnuplot Online</title>
-<body><h1>Gnuplot Online</h1><p id="status">Loading gnuplot…</p><div id="preview"></div>
-<script src="src/gnuplot-client.js?v=1"></script><script>
-new GnuplotClient().run('set title "Gnuplot in your browser"\nplot sin(x) lw 3').then(result => {
-document.getElementById('preview').innerHTML = result.svg;
-document.getElementById('status').textContent = result.stderr || `Rendered in ${result.ms.toFixed(0)} ms`;
-}).catch(error => { document.getElementById('status').textContent = error.message; });
-</script></body></html>
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#087e8b"><meta name="description" content="Write gnuplot scripts and see plots live in your browser. No server, free and available offline.">
+<meta name="hashbin-client-id" content=""><!-- Register Gnuplot Online before enabling saves. -->
+<title>Gnuplot Online — plot in your browser</title>
+<link rel="icon" href="icon.svg"><link rel="manifest" href="manifest.webmanifest"><link rel="stylesheet" href="src/app.css?v=1">
+</head>
+<body data-tab="preview">
+<header><div class="brand"><span class="brand-mark" aria-hidden="true">∿</span><div><h1>Gnuplot Online</h1><small>IDEAS INTO PLOTS</small></div></div><p class="tagline">A little code. A clearer picture.</p><a class="github" href="https://github.com/curtcox/GnuplotOnline" target="_blank" rel="noopener" aria-label="Fork Gnuplot Online on GitHub">Fork on GitHub ↗</a></header>
+<div class="toolbar" role="toolbar" aria-label="Plot controls">
+<div class="mobile-tabs" role="tablist" aria-label="Workspace"><button id="tab-preview" role="tab" aria-controls="preview-pane" aria-selected="true">Preview</button><button id="tab-code" role="tab" aria-controls="editor-pane" aria-selected="false">Code</button></div>
+<label>Size <select id="size" aria-label="Plot size"><option>640×480</option><option selected>800×600</option><option>1000×500</option><option>1200×800</option><option value="custom">Custom</option></select></label>
+<span id="custom-size" hidden><input id="width" aria-label="Width" type="number" min="100" max="4096" value="800">×<input id="height" aria-label="Height" type="number" min="100" max="4096" value="600"></span>
+<label class="background-label">Background <select id="background"><option value="white">White</option><option value="transparent">Transparent</option></select></label>
+<button id="data-open">Data files <span class="badge" id="file-count">0</span></button>
+<button id="more" aria-expanded="false" aria-controls="extra-tools">More</button>
+<div class="extra-tools" id="extra-tools">
+<select id="export-format" aria-label="Download format"><option value="svg">SVG</option><option value="png">PNG (2×)</option><option value="text">Text output</option><option value="source">Source (.gp)</option><option value="inline">Script + inlined data</option><option value="other">Terminal file</option></select><button id="download">Download</button>
+<button id="share" class="primary">Share</button><input id="share-url" class="link-field" aria-label="Share URL" readonly placeholder="A link to this plot"><button id="shorten">Shorten link</button><button id="qr-open">QR code</button>
+<button id="hashbin-save">Save to HashBin</button><input class="cid" id="hashbin-cid" aria-label="HashBin CID or URL" placeholder="CID or saved link"><button id="hashbin-load">Load from HashBin</button>
+<a href="http://gnuplot.info/docs_6.0/loc1.html" target="_blank" rel="noopener">Docs ↗</a><a href="https://gnuplot.sourceforge.net/docs_6.0/Gnuplot_6.0.pdf" target="_blank" rel="noopener">PDF ↗</a><a href="https://gnuplot.sourceforge.net/demo_6.0/" target="_blank" rel="noopener">Official demos ↗</a><a href="gallery.html">Sample gallery ↗</a>
+<span id="share-status" role="status"></span><span id="hashbin-status" role="status"></span>
+</div></div>
+<main class="workspace">
+<section id="editor-pane" aria-label="Code editor"><div class="pane-heading"><span class="filename">script.gp <span class="hint">/ gnuplot</span></span><button id="hide-editor">Hide editor</button></div><div id="editor" aria-label="Gnuplot source code"></div></section>
+<div id="splitter" role="separator" aria-label="Resize editor" aria-orientation="vertical" aria-valuenow="43" tabindex="0"></div>
+<section id="preview-pane" aria-label="Plot preview"><div class="pane-heading"><span>Preview</span><div class="preview-actions"><button id="show-editor" hidden>Show editor</button><button id="zoom-out" aria-label="Zoom out">−</button><button id="zoom-in" aria-label="Zoom in">+</button><button id="fit">Fit</button><button id="actual">1:1</button></div></div><div id="preview"><p class="empty">Loading gnuplot…</p></div><p id="note" hidden></p><pre id="error" role="alert" hidden></pre><details id="output-panel" hidden><summary>Output</summary><pre id="output"></pre></details></section>
+</main>
+<footer class="statusbar"><span id="status" role="status">Loading gnuplot…</span><button id="cancel" hidden>Cancel</button><span class="spacer"></span><span id="engine-version">gnuplot 6.0.2 · WebAssembly</span><span id="offline-status" role="status">Preparing offline…</span><button id="offline-action" hidden>Retry offline setup</button></footer>
+<dialog id="data-dialog" aria-labelledby="data-title"><h2 id="data-title">Data files</h2><p class="hint">UTF-8 text · 2 MiB per file · 5 MiB total. Use <code>plot 'name.dat' using 1:2</code>. You can also drop files onto the editor.</p><div id="file-list"></div><div class="dialog-actions"><button id="file-new">New file</button><button id="file-add">Add file</button><input id="file-upload" type="file" multiple hidden><button data-close="data-dialog">Done</button></div><div id="file-editor" hidden><label for="file-name">Filename</label><input id="file-name" placeholder="data.dat" maxlength="64"><label for="file-text">Data</label><textarea id="file-text" spellcheck="false"></textarea><div class="dialog-actions"><button id="file-save" class="primary">Save file</button><button id="file-cancel">Cancel edit</button></div></div><p id="data-message" role="status"></p></dialog>
+<dialog id="qr-dialog" aria-labelledby="qr-title"><h2 id="qr-title">Take your plot with you</h2><div id="qr-code"></div><p id="qr-message"></p><p id="qr-url"></p><div class="dialog-actions"><button id="qr-svg">Download QR (SVG)</button><button id="qr-png">Download QR (PNG)</button><button data-close="qr-dialog">Close</button></div></dialog>
+<dialog id="hashbin-dialog" aria-labelledby="hashbin-title"><h2 id="hashbin-title">Save to HashBin</h2><p id="hashbin-message" role="status"></p><div class="dialog-actions"><button id="hashbin-disconnect" hidden>Disconnect</button><button id="hashbin-close">Close</button><button id="hashbin-confirm" class="primary">Save</button></div></dialog>
+<script src="ace/ace.js?v=1"></script><script src="ace/theme-tomorrow.js?v=1"></script><script src="ace/ext-language_tools.js?v=1"></script><script src="src/mode-gnuplot.js?v=1"></script><script src="svg-pan-zoom.min.js?v=1"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/lz-string/1.5.0/lz-string.min.js"></script><script>if(!globalThis.LZString) document.write('<script src="vendor/lz-string.min.js"><\/script>');</script>
+<script src="src/gnuplot-core.js?v=1"></script><script src="src/gnuplot-client.js?v=1"></script><script src="src/render-scheduler.js?v=1"></script><script src="src/data-files.js?v=1"></script><script src="src/export.js?v=1"></script><script src="src/hashbin.js?v=1"></script><script src="src/hashbin-panel.js?v=1"></script><script src="src/share-links.js?v=1"></script><script src="src/qr.js?v=1"></script><script src="src/examples.js?v=1"></script><script src="src/app.js?v=1"></script><script src="src/offline.js?v=1"></script>
+</body></html>
