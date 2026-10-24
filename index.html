@@ -1,0 +1,8 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Gnuplot Online</title>
+<body><h1>Gnuplot Online</h1><p id="status">Loading gnuplot…</p><div id="preview"></div>
+<script src="src/gnuplot-client.js?v=1"></script><script>
+new GnuplotClient().run('set title "Gnuplot in your browser"\nplot sin(x) lw 3').then(result => {
+document.getElementById('preview').innerHTML = result.svg;
+document.getElementById('status').textContent = result.stderr || `Rendered in ${result.ms.toFixed(0)} ms`;
+}).catch(error => { document.getElementById('status').textContent = error.message; });
+</script></body></html>
