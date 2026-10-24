@@ -2,6 +2,8 @@
 const { chromium, firefox, webkit } = require('playwright');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
+const http = require('node:http');
+const path = require('node:path');
 const base = process.argv[2] || 'http://127.0.0.1:8000/';
 const name = process.argv[3] || 'chromium';
 const { HashBinDocuments: Docs } = require('../../src/hashbin.js');
@@ -119,19 +121,39 @@ async function run(label, task) { const start = Date.now(); await task(); consol
     const { context: c, page: p }=await context({viewport:{width:375,height:812},hasTouch:true,isMobile:name!=='firefox'});
     await p.goto(base);await rendered(p);assert.equal(await p.locator('#editor-pane').isVisible(),false);
     await p.click('#tab-code');assert.equal(await p.locator('#editor-pane').isVisible(),true);assert.equal(await p.locator('#preview-pane').isVisible(),false);
-    await p.click('#tab-preview');await p.click('#more');assert.equal(await p.locator('#more').getAttribute('aria-expanded'),'true');assert.equal(await p.locator('#hashbin-save').isVisible(),true);
+    await edit(p, 'set title "Phone edit"\nplot cos(x)');
+    await p.click('#tab-preview');assert.match(await p.locator('#preview').innerText(), /Phone edit/);await p.click('#more');assert.equal(await p.locator('#more').getAttribute('aria-expanded'),'true');assert.equal(await p.locator('#hashbin-save').isVisible(),true);
     assert.equal(await p.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false);
     for(const selector of ['#tab-code','#tab-preview','#more','#data-open','#download','#qr-open','#fit','#zoom-in']){const box=await p.locator(selector).boundingBox();assert.ok(box.height>=40,selector)}
     await p.screenshot({path:`test-results/${name}-mobile.png`,fullPage:true}); await c.close();
   });
-  await run('offline reload and render', async () => {
+  await run('offline reload and render with the origin stopped', async () => {
+    // Real origin failure avoids browser-specific offline-emulation behavior:
+    // https://github.com/microsoft/playwright/issues/42775
+    const root = path.resolve(__dirname, '../..');
+    const server = http.createServer((request, response) => {
+      try {
+        const pathname = decodeURIComponent(new URL(request.url, 'http://localhost').pathname);
+        const file = path.resolve(root, '.' + (pathname.endsWith('/') ? pathname + 'index.html' : pathname));
+        if (!file.startsWith(root + path.sep)) { response.writeHead(403).end(); return; }
+        const types = { '.html': 'text/html', '.js': 'application/javascript', '.css': 'text/css', '.svg': 'image/svg+xml', '.wasm': 'application/wasm', '.webmanifest': 'application/manifest+json', '.png': 'image/png' };
+        response.setHeader('Content-Type', types[path.extname(file)] || 'text/plain'); response.end(fs.readFileSync(file));
+      } catch (_) { response.writeHead(404).end(); }
+    });
+    await new Promise(resolve => server.listen(0, '127.0.0.1', resolve));
+    const offlineBase = `http://127.0.0.1:${server.address().port}/`;
     const {context:c,page:p}=await context({serviceWorkers:'allow'});
-    await p.goto(base);await rendered(p);
-    await p.waitForFunction(()=>document.getElementById('offline-status').textContent==='Available offline',null,{timeout:45000});
-    await p.evaluate(()=>navigator.serviceWorker.ready);await c.setOffline(true);await p.reload();await rendered(p);
-    await edit(p,'set title "Offline works"\nplot cos(x)');assert.match(await p.locator('#preview').innerText(),/Offline works/);
-    await p.goto(new URL('gallery.html',base).href);assert.equal(await p.locator('.card').count(),16);
-    await c.close();
+    try {
+      await p.goto(offlineBase);await rendered(p);
+      await p.waitForFunction(()=>document.getElementById('offline-status').textContent==='Available offline',null,{timeout:45000});
+      await p.waitForFunction(()=>!!navigator.serviceWorker.controller);
+      await p.reload();await rendered(p);
+      await new Promise(resolve => { server.close(resolve); server.closeAllConnections(); });
+      await assert.rejects(fetch(offlineBase));
+      await p.reload();await rendered(p);
+      await edit(p,'set title "Offline works"\nplot cos(x)');assert.match(await p.locator('#preview').innerText(),/Offline works/);
+      await p.goto(new URL('gallery.html',offlineBase).href);assert.equal(await p.locator('.card').count(),16);
+    } finally { await c.close(); if (server.listening) await new Promise(resolve=>server.close(resolve)); }
   });
   assert.deepEqual(errors,[],'Unexpected page errors');
 })().catch(error=>{console.error(error);process.exitCode=1}).finally(async()=>{await browser?.close()});

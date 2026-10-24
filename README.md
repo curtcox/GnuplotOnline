@@ -62,7 +62,7 @@ The unit suite runs the actual vendored engine, including 50 successive runs, ex
 error lines, datablocks/files, text and PostScript output. It also checks documents,
 OAuth/quote/save mocks, file limits/UTF-8, QR vectors, share fallbacks, timeout/restart
 behavior, gallery fingerprints and offline coverage. Browser tests exercise editing,
-exports, sharing, HashBin, every gallery example, mobile layout and offline reloads.
+exports, sharing, HashBin, every gallery example, mobile layout and offline reloads with the application origin stopped.
 CI runs the browser suite on Chromium, Firefox and WebKit. Deployment is independent
 of tests, as specified in the plan.
 
