@@ -341,7 +341,7 @@ Each phase is one commit (or a few) on a branch, with a PR into `main`. Merging 
 - [x] Sixteen original samples, searchable/tagged gallery, generated covers and fingerprint checks.
 - [x] Atomic offline precache, update/retry status, manifest and install icons.
 - [x] Node tests, cross-browser Playwright suite, CI, README and AGENTS.md.
-- [ ] User: register the HashBin application and replace the empty public client ID.
+- [x] User: register the HashBin application and replace the empty public client ID (completed 2026-10-25).
 
 The user requested direct commits/pushes on `main`, superseding the branch/PR phase
 workflow above. Pages was already configured with `build_type: workflow`.
@@ -352,3 +352,7 @@ missing from npm and have been vendored separately with provenance. Some low-res
 fits expose the upstream build's `Igamma` diagnostic; the limitation is documented and
 the original fitting sample is verified against this engine. The unmodified engine
 binaries remain from the exact pinned npm tarball.
+
+HashBin registration completed on 2026-10-25. Public client ID:
+`app_69800851-cef2-4274-9c7b-b1e908965181`. The editor meta tag and offline cache
+now include the registered configuration.

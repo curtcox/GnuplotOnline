@@ -16,8 +16,8 @@ server. Serve the repository root over HTTP, never file://.
   a timeout must terminate the worker, since synchronous WASM cannot process a cancel message.
 - Keep file validation, source limits and filename reservations consistent in data files,
   documents and worker input. Source/files/settings must survive all sharing/save paths.
-- Preserve HashBin transaction prefix `gnuplotonline:hashbin:return:`. Its client ID
-  meta tag intentionally stays empty until the user registers the app. Do not invent an ID.
+- Preserve HashBin transaction prefix `gnuplotonline:hashbin:return:`. The registered public
+  client ID lives in the `hashbin-client-id` meta tag. Preserve it unless the user supplies a replacement.
 - Keep the QR encoder's MIT notice and all vendored dependency notices.
 - Keep SVG sanitization before injection/export; preserve the last good plot on errors.
 - A source/example URL takes priority over localStorage. Guard asynchronous loads and

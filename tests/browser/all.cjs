@@ -77,7 +77,12 @@ async function run(label, task) { const start = Date.now(); await task(); consol
     const { context: c, page: p } = await context();
     const bare='set title "CID plot"\nplot x', inline=cidFor(bare);
     await p.goto(base+'#'+inline); await rendered(p); assert.match(await p.locator('#preview').innerText(),/CID plot/);
-    await p.click('#hashbin-save'); await p.waitForFunction(()=>document.getElementById('hashbin-message').textContent.includes('registered client ID')); await p.click('#hashbin-close');
+    const registeredClient = /name="hashbin-client-id" content="([^"]+)"/.exec(fs.readFileSync('index.html','utf8'))[1];
+    await p.route('https://hashbin.org/sdk/hashbin.js', route=>route.fulfill({ contentType:'application/javascript', body: `export class HashBinClient {
+      constructor(options) { if (options.clientId !== ${JSON.stringify(registeredClient)} || options.redirectUri !== ${JSON.stringify(new URL('./',base).href)}) throw new Error('Incorrect HashBin registration configuration'); }
+      getTokens() { return null; }
+    }` }));
+    await p.click('#hashbin-save'); await p.waitForFunction(()=>document.getElementById('hashbin-confirm').textContent==='Connect to HashBin' && !document.getElementById('hashbin-confirm').disabled); await p.click('#hashbin-close');
     const payload=Docs.serialize({ src:'set title "Slow old plot"\nplot x', files:{}, gnuplot:{} }), remote=cidFor(payload);
     let release; const pending=new Promise(resolve=>{release=resolve});
     await p.route('https://256t.us/'+remote,async route=>{await pending; await route.fulfill({body:payload})});
@@ -86,7 +91,7 @@ async function run(label, task) { const start = Date.now(); await task(); consol
     await c.close();
     const { context: auth, page: a }=await context();
     await auth.route(base+'**',async route=>{
-      if (route.request().isNavigationRequest()) { const html=fs.readFileSync('index.html','utf8').replace('name="hashbin-client-id" content=""','name="hashbin-client-id" content="test-client"'); await route.fulfill({ contentType:'text/html',body:html }); } else await route.continue();
+      if (route.request().isNavigationRequest()) { const html=fs.readFileSync('index.html','utf8').replace(/name="hashbin-client-id" content="[^"]*"/,'name="hashbin-client-id" content="test-client"'); await route.fulfill({ contentType:'text/html',body:html }); } else await route.continue();
     });
     const sdk=`export class HashBinClient {
       constructor(){this.tokens=null}

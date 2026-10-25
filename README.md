@@ -93,19 +93,22 @@ JSON document>`, `?example=<id>` and `#<HashBin CID>`. Legacy source URLs can in
 {"format":"hashbin-diagram","version":1,"type":"gnuplot","src":"plot x","gnuplot":{"width":800,"height":600,"background":"white"},"files":{}}
 ```
 
-HashBin loads work now, including inline CIDs and plain script payloads. Saves
-intentionally ship with an empty public client ID. Register **Gnuplot Online** at
-[HashBin developers](https://hashbin.org/developers) with this exact return URL:
+HashBin loading and saving are configured for the registered **Gnuplot Online** app.
+The public OAuth client ID is `app_69800851-cef2-4274-9c7b-b1e908965181`; it is not a
+secret. The registered return URL must remain exactly:
 
 ```text
 https://curtcox.github.io/GnuplotOnline/
 ```
 
-Put the public ID in the `hashbin-client-id` meta tag in `index.html`, regenerate the
-offline manifest, and push. Until configured, saving explains that a registered client
-ID is needed. After configuration, saves use HashBin's OAuth SDK with source-preserving
-redirects and show the retention/cost quote before the user confirms a save. Editing
-a saved plot replaces its CID URL with a link representing the edits.
+Saves use HashBin's OAuth SDK with source-preserving redirects and show the
+retention/cost quote before the user confirms a save. Editing a saved plot replaces
+its CID URL with a link representing the edits. Inline CIDs and plain script
+payloads also load.
+
+If the registration changes, update the `hashbin-client-id` meta tag in `index.html`,
+regenerate the offline manifest, and push. A fork needs its own
+[HashBin registration](https://hashbin.org/developers) matching its public return URL.
 
 ## Engine limitations
 
