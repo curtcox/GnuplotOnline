@@ -102,7 +102,7 @@ https://curtcox.github.io/GnuplotOnline/
 ```
 
 Saves use HashBin Publish through the pinned SDK
-(`https://hashbin.org/sdk/v0.2.0/hashbin.js`): HashBin shows the size, retention, exact
+(`https://hashbin.org/sdk/v0.3.0/hashbin.js`): HashBin shows the size, retention, exact
 price and balance, and the user approves each save on hashbin.org. This app never holds
 a HashBin credential; tokens left by the earlier OAuth flow are revoked on the next load.
 A blocked popup falls back to a redirect that restores source, files and settings, even
