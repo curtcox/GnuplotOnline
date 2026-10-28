@@ -94,17 +94,27 @@ JSON document>`, `?example=<id>` and `#<HashBin CID>`. Legacy source URLs can in
 ```
 
 HashBin loading and saving are configured for the registered **Gnuplot Online** app.
-The public OAuth client ID is `app_69800851-cef2-4274-9c7b-b1e908965181`; it is not a
+The public client ID is `app_69800851-cef2-4274-9c7b-b1e908965181`; it is not a
 secret. The registered return URL must remain exactly:
 
 ```text
 https://curtcox.github.io/GnuplotOnline/
 ```
 
-Saves use HashBin's OAuth SDK with source-preserving redirects and show the
-retention/cost quote before the user confirms a save. Editing a saved plot replaces
-its CID URL with a link representing the edits. Inline CIDs and plain script
+Saves use HashBin Publish through the pinned SDK
+(`https://hashbin.org/sdk/v0.2.0/hashbin.js`): HashBin shows the size, retention, exact
+price and balance, and the user approves each save on hashbin.org. This app never holds
+a HashBin credential; tokens left by the earlier OAuth flow are revoked on the next load.
+A blocked popup falls back to a redirect that restores source, files and settings, even
+after a cancelled save. Editing a saved plot replaces its CID URL with a link
+representing the edits. Loads verify bytes against the CID. Inline CIDs and plain script
 payloads also load.
+
+Every app under `curtcox.github.io` shares this origin's storage. Share, sample and CID
+links ask before replacing the plot kept in this browser. The service worker stores and
+serves only bytes matching the SHA-256 hashes in `offline-assets.js`, and a
+Content-Security-Policy limits scripts to this site, the pinned lz-string path and the
+pinned SDK.
 
 If the registration changes, update the `hashbin-client-id` meta tag in `index.html`,
 regenerate the offline manifest, and push. A fork needs its own

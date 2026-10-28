@@ -336,7 +336,7 @@ Each phase is one commit (or a few) on a branch, with a PR into `main`. Merging 
 - [x] Ace mode/autocomplete, live rendering, line diagnostics, splitter, preview controls and exports.
 - [x] Source/document links, shortener, QR display and SVG/PNG downloads.
 - [x] UTF-8 data upload/drop/edit/rename/remove, validation, local persistence and document sharing.
-- [x] HashBin document/store/panel, CID loading, OAuth restoration, quotes, saves and stale-load guards.
+- [x] HashBin document/store/panel, verified CID loading, HashBin Publish saves (OAuth replaced 2026-10-28) and stale-load guards.
 - [x] Phone tabs/More layout, touch pan/pinch, custom sizing and touch controls.
 - [x] Sixteen original samples, searchable/tagged gallery, generated covers and fingerprint checks.
 - [x] Atomic offline precache, update/retry status, manifest and install icons.

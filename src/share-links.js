@@ -38,6 +38,7 @@ const ShareLinks = {
       return { kind: 'source', src, files: {}, gnuplot: { width: params.get('w') || 800, height: params.get('h') || 600, background: params.get('bg') || 'white' } };
     }
     const hash = link.hash.slice(1);
+    if (new URLSearchParams(hash).has('hashbin_publish')) return { kind: 'publish' };
     if (HashBinDocuments.isCID(hash)) return { kind: 'cid', cid: hash };
     if (hash) return { kind: 'source', src: decodeURIComponent(hash), files: {}, gnuplot: { width: params.get('w') || 800, height: params.get('h') || 600, background: params.get('bg') || 'white' } };
     if (params.has('example')) return { kind: 'example', id: params.get('example') };

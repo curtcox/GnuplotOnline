@@ -116,8 +116,17 @@
   const redirect = new URL('./', location.href); redirect.search = ''; redirect.hash = '';
   const store = new HashBinStore({ clientId: document.querySelector('meta[name="hashbin-client-id"]').content.trim(),
     redirectUri: redirect.href, storage: local, transactionStorage: safeStorage('sessionStorage') });
+  // Links can come from anyone; never let one silently replace work kept in this browser.
+  let linkLoad = false;
+  function acceptLink(doc) {
+    const same = (a, b) => a.src === b.src && JSON.stringify(a.files || {}) === JSON.stringify(b.files || {}), current = snapshot();
+    if (same(current, doc) || current.src === GnuplotExamples.defaultSource || GnuplotExamples.catalog.some(sample => same(current, { src: sample.source, files: sample.files || {} }))) return true;
+    if (confirm('This link opens a different plot. Replace the plot saved in this browser?\n\nChoose Cancel to keep your current work.')) return true;
+    refreshShare({ address: true });
+    return false;
+  }
   const hashbin = new HashBinPanel({ store, getSnapshot: snapshot, getFingerprint: fingerprint,
-    onLoad: (doc, cid) => { apply(doc); const link = HashBinDocuments.link(location.href, cid); saved = { fingerprint: fingerprint(), link }; history.replaceState(null, '', link); refreshShare(); },
+    onLoad: (doc, cid) => { if (linkLoad && !acceptLink(doc)) return false; apply(doc); const link = HashBinDocuments.link(location.href, cid); saved = { fingerprint: fingerprint(), link }; history.replaceState(null, '', link); refreshShare(); },
     onSaved: (_cid, value, link) => { saved = { fingerprint: value, link }; history.replaceState(null, '', link); refreshShare(); } });
   editor.session.on('change', changed);
   $('cancel').onclick = () => { revision++; scheduler.cancel(); client.cancel(); $('cancel').hidden = true; $('status').textContent = 'Cancelled'; };
@@ -239,28 +248,33 @@
   window.addEventListener('offline-before-reload', persist);
   async function loadUrl({ initial = false } = {}) {
     hashbin.cancelLoad();
-    const loadRevision = revision;
     try {
-      const callback = initial ? await store.callback(location.search) : null;
-      if (callback) {
-        if (callback.snapshot && loadRevision === revision) apply(callback.snapshot);
-        const clean = new URL(location.href); for (const key of ['code','state','error','error_description']) clean.searchParams.delete(key); history.replaceState(null, '', clean);
-        $('hashbin-status').textContent = callback.error || 'Connected to HashBin. Choose Save to HashBin to save.';
-        refreshShare(); return;
-      }
-      const parsed = ShareLinks.parse(location.href, LZString.decompressFromEncodedURIComponent);
-      if (parsed?.kind === 'source') apply(parsed);
-      else if (parsed?.kind === 'example') {
-        const sample = GnuplotExamples.catalog.find(item => item.id === parsed.id);
-        if (!sample) throw new Error('Unknown example. Choose a sample from the gallery.');
-        apply({ src: sample.source, files: sample.files || {} });
-      } else if (parsed?.kind === 'cid') {
-        if (initial) apply({ src: GnuplotExamples.defaultSource });
-        await hashbin.load(parsed.cid); return;
-      } else if (initial) {
+      if (initial) {
+        store.retireLegacyTokens().catch(() => { /* Retried on the next load. */ });
         let restored = null; try { const text = local?.getItem('gnuplotonline:document'); if (text) restored = HashBinDocuments.parse(text); } catch (_) { /* Ignore invalid or unavailable storage. */ }
         const params = new URL(location.href).searchParams;
         apply(restored || { src: GnuplotExamples.defaultSource, gnuplot: { width: params.get('w') || 800, height: params.get('h') || 600, background: params.get('bg') } });
+      }
+      const loadRevision = revision;
+      const parsed = ShareLinks.parse(location.href, LZString.decompressFromEncodedURIComponent);
+      if (parsed?.kind === 'publish') {
+        const published = await store.published(location.hash);
+        // Edits made while the return was verified win over it.
+        const current = loadRevision === revision;
+        if (published.snapshot && current) apply(published.snapshot);
+        if (published.cid && current) saved = { fingerprint: fingerprint(), link: HashBinDocuments.link(location.href, published.cid) };
+        if (saved) history.replaceState(null, '', saved.link); else refreshShare({ address: true });
+        $('hashbin-status').textContent = published.error || 'Saved to HashBin.';
+      } else if (parsed?.kind === 'source') { if (acceptLink(parsed)) apply(parsed); }
+      else if (parsed?.kind === 'example') {
+        const sample = GnuplotExamples.catalog.find(item => item.id === parsed.id);
+        if (!sample) throw new Error('Unknown example. Choose a sample from the gallery.');
+        const doc = { src: sample.source, files: sample.files || {} };
+        if (acceptLink(doc)) apply(doc);
+      } else if (parsed?.kind === 'cid') {
+        linkLoad = true;
+        try { await hashbin.load(parsed.cid); } finally { linkLoad = false; }
+        return;
       }
       refreshShare();
     } catch (error) { if (initial && !editor.getValue()) apply({ src: GnuplotExamples.defaultSource }); setError(error.message); }

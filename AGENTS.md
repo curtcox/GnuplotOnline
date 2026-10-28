@@ -16,11 +16,15 @@ server. Serve the repository root over HTTP, never file://.
   a timeout must terminate the worker, since synchronous WASM cannot process a cancel message.
 - Keep file validation, source limits and filename reservations consistent in data files,
   documents and worker input. Source/files/settings must survive all sharing/save paths.
-- Preserve HashBin transaction prefix `gnuplotonline:hashbin:return:`. The registered public
-  client ID lives in the `hashbin-client-id` meta tag. Preserve it unless the user supplies a replacement.
+- Saves use the pinned SDK's `publish()` from the click (never OAuth tokens on this shared
+  origin). The registered public client ID lives in the `hashbin-client-id` meta tag.
+  Preserve it unless the user supplies a replacement. Keep scripts out of HTML: the
+  Content-Security-Policy allows no inline script. The service worker serves only
+  hash-verified bytes; run `node scripts/update-offline.mjs` after shipped-file changes.
 - Keep the QR encoder's MIT notice and all vendored dependency notices.
 - Keep SVG sanitization before injection/export; preserve the last good plot on errors.
-- A source/example URL takes priority over localStorage. Guard asynchronous loads and
+- A source/example/CID URL replaces the localStorage plot only after the user confirms,
+  unless the stored plot is a sample or the default. Guard asynchronous loads and
   renders against newer edits. Storage failure must not prevent editing.
 
 ## Validation and generated files

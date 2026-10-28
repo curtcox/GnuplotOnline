@@ -14,6 +14,9 @@ const errors = [];
 async function context(options = {}) {
   const context = await browser.newContext({ serviceWorkers: 'block', acceptDownloads: true, ...options });
   await context.route('https://cdnjs.cloudflare.com/**', route => route.fulfill({ contentType: 'application/javascript', body: fs.readFileSync('vendor/lz-string.min.js','utf8') }));
+  // Content-Security-Policy violations count as page errors: the policy must not block the app itself.
+  await context.exposeBinding('__cspViolation', (_, text) => errors.push('CSP: ' + text));
+  await context.addInitScript(() => addEventListener('securitypolicyviolation', event => globalThis.__cspViolation?.(`${event.violatedDirective} ${event.blockedURI} ${location.pathname}`)));
   const page = await context.newPage(); page.on('pageerror', error => errors.push(error.message));
   return { context, page };
 }
@@ -25,6 +28,7 @@ async function edit(page, source) {
   await page.evaluate(source => editor.setValue(source, -1), source);
   await page.waitForFunction(() => /^Rendered in/.test(document.getElementById('status').textContent), null, { timeout: 20000 });
 }
+const isCIDHash = hash => Docs.isCID(hash.slice(1));
 function cidFor(text) {
   const n = Buffer.byteLength(text), prefix = Buffer.alloc(6); prefix.writeUIntBE(n, 0, 6);
   return prefix.toString('base64url') + (n <= 64 ? Buffer.from(text) : Buffer.alloc(64, 7)).toString('base64url');
@@ -60,7 +64,7 @@ async function run(label, task) { const start = Date.now(); await task(); consol
     const { context: c, page: p } = await context(); await p.goto(base); await rendered(p);
     await edit(p,'set title "Shared wave"\nplot sin(x)'); await p.click('#share');
     let link=await p.inputValue('#share-url'); assert.ok(new URL(link).searchParams.has('compressed'));
-    const p2=await c.newPage(); await p2.goto(link); await rendered(p2); assert.match(await p2.locator('#preview').innerText(), /Shared wave/);
+    const p2=await c.newPage(); p2.on('dialog',dialog=>dialog.accept()); await p2.goto(link); await rendered(p2); assert.match(await p2.locator('#preview').innerText(), /Shared wave/);
     await p.click('#data-open'); await p.click('#file-new'); await p.fill('#file-name','observations.dat'); await p.fill('#file-text','1 2\n2 5\n3 4'); await p.click('#file-save');
     await p.click('[data-close="data-dialog"]'); await edit(p,"plot 'observations.dat' using 1:2 with lines"); await p.click('#share');
     link=await p.inputValue('#share-url'); assert.ok(new URL(link).searchParams.has('doc'));
@@ -73,46 +77,57 @@ async function run(label, task) { const start = Date.now(); await task(); consol
     await p.goto(base); await rendered(p); assert.equal(await p.locator('#file-count').innerText(),'1');
     await c.close();
   });
-  await run('HashBin inline CIDs, stale loads and mocked OAuth/quote/save', async () => {
+  await run('HashBin inline CIDs, stale loads, links that ask first and mocked Publish saves', async () => {
     const { context: c, page: p } = await context();
     const bare='set title "CID plot"\nplot x', inline=cidFor(bare);
     await p.goto(base+'#'+inline); await rendered(p); assert.match(await p.locator('#preview').innerText(),/CID plot/);
+    // The policy is live: a script from an unlisted host is refused and reported.
+    await p.evaluate(()=>{const script=document.createElement('script');script.src='https://example.invalid/injected.js';document.head.append(script);});
+    await new Promise(resolve=>{const wait=()=>errors.some(e=>e.includes('example.invalid'))?resolve():setTimeout(wait,50);wait();});
+    errors.splice(0,errors.length,...errors.filter(e=>!e.includes('example.invalid')));
     const registeredClient = /name="hashbin-client-id" content="([^"]+)"/.exec(fs.readFileSync('index.html','utf8'))[1];
-    await p.route('https://hashbin.org/sdk/hashbin.js', route=>route.fulfill({ contentType:'application/javascript', body: `export class HashBinClient {
+    await p.route('https://hashbin.org/sdk/v0.2.0/hashbin.js', route=>route.fulfill({ contentType:'application/javascript', body: `export class HashBinClient {
       constructor(options) { if (options.clientId !== ${JSON.stringify(registeredClient)} || options.redirectUri !== ${JSON.stringify(new URL('./',base).href)}) throw new Error('Incorrect HashBin registration configuration'); }
-      getTokens() { return null; }
     }` }));
-    await p.click('#hashbin-save'); await p.waitForFunction(()=>document.getElementById('hashbin-confirm').textContent==='Connect to HashBin' && !document.getElementById('hashbin-confirm').disabled); await p.click('#hashbin-close');
+    await p.click('#hashbin-save'); await p.waitForFunction(()=>document.getElementById('hashbin-confirm').textContent==='Review on HashBin' && !document.getElementById('hashbin-confirm').disabled); assert.match(await p.locator('#hashbin-message').innerText(),/approve the save on hashbin\.org/); await p.click('#hashbin-close');
     const payload=Docs.serialize({ src:'set title "Slow old plot"\nplot x', files:{}, gnuplot:{} }), remote=cidFor(payload);
     let release; const pending=new Promise(resolve=>{release=resolve});
     await p.route('https://256t.us/'+remote,async route=>{await pending; await route.fulfill({body:payload})});
     await p.fill('#hashbin-cid',remote); await p.click('#hashbin-load'); await edit(p,'set title "Newer edit"\nplot cos(x)'); release();
     await p.waitForTimeout(250); assert.match(await p.evaluate(()=>editor.getValue()),/Newer edit/);
+    // A link that would replace work kept in this browser asks first.
+    await p.waitForTimeout(300); p.once('dialog',dialog=>dialog.dismiss()); await p.goto(base+'?example='+require('../../src/examples.js').catalog[1].id); await rendered(p);
+    assert.match(await p.evaluate(()=>editor.getValue()),/Newer edit/); assert.ok(!p.url().includes('example='));
     await c.close();
     const { context: auth, page: a }=await context();
     await auth.route(base+'**',async route=>{
       if (route.request().isNavigationRequest()) { const html=fs.readFileSync('index.html','utf8').replace(/name="hashbin-client-id" content="[^"]*"/,'name="hashbin-client-id" content="test-client"'); await route.fulfill({ contentType:'text/html',body:html }); } else await route.continue();
     });
-    const sdk=`export class HashBinClient {
-      constructor(){this.tokens=null}
-      getTokens(){return this.tokens}
-      async handleCallback(){this.tokens={refreshToken:'mock',expiresAt:Date.now()+3600000}}
-      async refreshAccessToken(){}
-      clearTokens(){this.tokens=null}
-      async authorize(){return {state:'next',url:'https://hashbin.org/authorize?state=next'}}
-      async authorizedFetch(path,options){return fetch('https://hashbin.org'+path,options)}
+    // Stands in for the pinned SDK: popup approval, cancellation, a blocked popup's redirect round trip and revocation.
+    const sdk=`const encode=bytes=>btoa(String.fromCharCode(...bytes)).replace(/\\+/g,'-').replace(/\\//g,'_').replace(/=+$/,'');
+    async function cid(text){const bytes=new TextEncoder().encode(text),size=new Uint8Array(6);new DataView(size.buffer).setUint32(2,bytes.length);return encode(size)+encode(bytes.length<=64?bytes:new Uint8Array(await crypto.subtle.digest('SHA-512',bytes)));}
+    export class HashBinClient {
+      constructor(options){this.options=options}
+      publish(content,{clientState}){const mode=localStorage.getItem('test:publish')||'approve';return cid(content).then(saved=>{
+        if(mode==='cancel')throw new Error('access_denied');
+        if(mode==='redirect'){sessionStorage.setItem('test:state',JSON.stringify(clientState));location.href=this.options.redirectUri+'#hashbin_publish=t&cid='+saved;return {redirected:true};}
+        return {cid:saved};});}
+      async handlePublishCallback({hash}){const clientState=JSON.parse(sessionStorage.getItem('test:state'));return {cid:new URLSearchParams(hash.slice(1)).get('cid'),clientState};}
+      async disconnect(){localStorage.removeItem('hashbin:tokens:test-client');localStorage.setItem('test:revoked','yes');}
     }`;
-    await auth.route('https://hashbin.org/sdk/hashbin.js', route=>route.fulfill({contentType:'application/javascript',body:sdk}));
-    await auth.route('https://hashbin.org/api/**', route=>{
-      const path=new URL(route.request().url()).pathname;
-      const data=path.endsWith('/settings')?{default_retention_months:1}:path.endsWith('/balance')?{balance_cents:100}:path.endsWith('/calculate')?{cost_cents:0}:{cid:remote};
-      return route.fulfill({json:data});
-    });
-    await auth.addInitScript(({snapshot})=>sessionStorage.setItem('gnuplotonline:hashbin:return:state',JSON.stringify({snapshot,createdAt:Date.now()})),{snapshot:{src:'set title "Restored source"\nplot x',files:{},gnuplot:{}}});
-    await a.goto(base+'?code=mock&state=state'); await rendered(a); assert.match(await a.evaluate(()=>editor.getValue()),/Restored source/); assert.equal(new URL(a.url()).search,'');
-    await a.click('#hashbin-save'); await a.waitForFunction(()=>!document.getElementById('hashbin-confirm').disabled); assert.match(await a.locator('#hashbin-message').innerText(),/Cost:/);
-    await a.click('#hashbin-confirm'); await a.waitForFunction(()=>location.hash.length>8); assert.equal(new URL(a.url()).hash,'#'+remote);
-    await a.click('#hashbin-close'); await edit(a,'plot x*x'); await a.waitForFunction(()=>!location.hash); assert.ok(new URL(a.url()).searchParams.has('compressed'));
+    await auth.route('https://hashbin.org/sdk/v0.2.0/hashbin.js', route=>route.fulfill({contentType:'application/javascript',body:sdk}));
+    await auth.addInitScript(()=>{ if (!sessionStorage.getItem('test:seeded')) { sessionStorage.setItem('test:seeded','1'); localStorage.setItem('hashbin:tokens:test-client','{"refreshToken":"old"}'); } });
+    await a.goto(base); await rendered(a); await a.waitForFunction(()=>localStorage.getItem('test:revoked')==='yes' && !localStorage.getItem('hashbin:tokens:test-client'));
+    const save=async()=>{await a.click('#hashbin-save'); await a.waitForFunction(()=>document.getElementById('hashbin-confirm').textContent==='Review on HashBin' && !document.getElementById('hashbin-confirm').disabled);};
+    await edit(a,'set title "Popup save"\nplot x'); await a.waitForTimeout(300);
+    await save(); await a.click('#hashbin-confirm'); await a.waitForFunction(()=>document.getElementById('hashbin-status').textContent==='Saved to HashBin.'); assert.ok(isCIDHash(new URL(a.url()).hash), a.url()); await a.click('#hashbin-close');
+    await a.evaluate(()=>localStorage.setItem('test:publish','cancel')); await edit(a,'set title "Cancelled"\nplot x'); await save(); await a.click('#hashbin-confirm');
+    await a.waitForFunction(()=>/cancelled on HashBin/.test(document.getElementById('hashbin-message').textContent)); await a.click('#hashbin-close');
+    await a.evaluate(()=>localStorage.setItem('test:publish','redirect')); await edit(a,'set title "Restored source"\nplot x'); await a.waitForTimeout(300); await save();
+    await Promise.all([a.waitForURL('**#hashbin_publish=*'),a.click('#hashbin-confirm')]); await rendered(a);
+    await a.waitForFunction(()=>document.getElementById('hashbin-status').textContent==='Saved to HashBin.'); assert.match(await a.evaluate(()=>editor.getValue()),/Restored source/); assert.ok(isCIDHash(new URL(a.url()).hash));
+    await a.evaluate(()=>localStorage.removeItem('test:publish'));
+    await edit(a,'plot x*x'); await a.waitForFunction(()=>!location.hash); assert.ok(new URL(a.url()).searchParams.has('compressed'));
     await auth.close();
   });
   await run('gallery: all sixteen cards render in the editor', async () => {
@@ -153,6 +168,11 @@ async function run(label, task) { const start = Date.now(); await task(); consol
       await p.waitForFunction(()=>document.getElementById('offline-status').textContent==='Available offline',null,{timeout:45000});
       await p.waitForFunction(()=>!!navigator.serviceWorker.controller);
       await p.reload();await rendered(p);
+      // A sibling app on the same origin can write this app's Cache Storage; altered entries are never served.
+      await p.evaluate(async()=>{const cache=await caches.open((await caches.keys()).find(name=>name.startsWith('gnuplot-')));await cache.put(new URL('src/qr.js',location.href).href,new Response('globalThis.poisonedCache=true;',{headers:{'Content-Type':'text/javascript'}}));});
+      await p.reload();await rendered(p);assert.equal(await p.evaluate(()=>globalThis.poisonedCache),undefined);
+      await p.waitForFunction(()=>document.getElementById('offline-status').textContent==='Offline setup incomplete',null,{timeout:45000});
+      await p.click('#offline-action');await p.waitForFunction(()=>document.getElementById('offline-status').textContent==='Available offline',null,{timeout:45000});
       await new Promise(resolve => { server.close(resolve); server.closeAllConnections(); });
       await assert.rejects(fetch(offlineBase));
       await p.reload();await rendered(p);
