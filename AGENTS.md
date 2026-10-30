@@ -6,7 +6,7 @@ server. Serve the repository root over HTTP, never file://.
 
 ## Important contracts
 
-- Public URL and HashBin redirect: `https://curtcox.github.io/GnuplotOnline/` (case matters).
+- Public URL and HashBin redirect: `https://gnuplot.hashbin.page/` (case matters).
 - Keep `vendor/gnuplot/gnuplot.js` and `.wasm` byte-identical to the recorded npm tarball.
   The upstream loader is ESM, loaded by dynamic import from a classic worker; the
   local vendor package.json declares its module type for Node tests.

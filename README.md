@@ -151,3 +151,7 @@ This site is not affiliated with the gnuplot project.
   fallback also supports offline preparation when cdnjs is unavailable.
 - QR encoder: Project Nayuki, MIT; full notice retained in `src/qr.js`, ported from modl.
 - All gallery scripts were written for this site; they are not copies of the official demos.
+
+## Canonical HashBin address
+
+The production app is [https://gnuplot.hashbin.page/](https://gnuplot.hashbin.page/). The GitHub Pages copy is kept for moving old drafts through **Move saved work** or **Download backup**. Transfers copy only this app's documents and public settings, keep the old copy, and never copy HashBin credentials or Python filesystem permissions. Deployment is managed by [HashBin's first-party deployment tool](https://github.com/curtcox/hashbin.org/blob/main/scripts/deploy-owned-apps.mjs).

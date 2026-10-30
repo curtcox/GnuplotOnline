@@ -26,7 +26,7 @@ const HashBinDocuments = {
     if (this.isCID(text)) return text;
     try {
       const url = new URL(text);
-      if (url.protocol !== 'https:' || !['hashbin.org', '256t.us', 'curtcox.github.io'].includes(url.hostname)) return null;
+      if (url.protocol !== 'https:' || !['hashbin.org', '256t.us', 'curtcox.github.io', 'gnuplot.hashbin.page'].includes(url.hostname)) return null;
       const candidate = url.hash.slice(1) || url.pathname.split('/').pop();
       return this.isCID(candidate) ? candidate : null;
     } catch (_) { return null; }
