@@ -1,6 +1,6 @@
 /** Terminating the worker also interrupts synchronous WASM and infinite loops. */
 class GnuplotClient {
-  constructor({ workerFactory = () => new Worker('src/gnuplot-worker.js'), timeout = 5000,
+  constructor({ workerFactory = () => GnuplotSandbox.factory()(), timeout = 5000,
     onSlow = () => {}, timers = globalThis } = {}) {
     Object.assign(this, { workerFactory, timeout, onSlow, timers });
     this.sequence = 0;

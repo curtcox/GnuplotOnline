@@ -8,8 +8,8 @@ server. Serve the repository root over HTTP, never file://.
 
 - Public URL and HashBin redirect: `https://gnuplot.hashbin.page/` (case matters).
 - Keep `vendor/gnuplot/gnuplot.js` and `.wasm` byte-identical to the recorded npm tarball.
-  The upstream loader is ESM, loaded by dynamic import from a classic worker; the
-  local vendor package.json declares its module type for Node tests.
+  The upstream loader is ESM, loaded through `hashbinSandbox.import` from an opaque-origin
+  classic worker; the local vendor package.json declares its module type for Node tests.
 - Terminal defaults go through `callMain(['-e', setup, 'script.gp'])`. Do not prepend
   lines to user scripts: diagnostics must retain the real line numbers.
 - Snapshot/restore the heap around every run. Run gnuplot only in a worker in the UI;
@@ -19,8 +19,8 @@ server. Serve the repository root over HTTP, never file://.
 - Saves use the pinned SDK's `publish()` from the click (never OAuth tokens on this shared
   origin). The registered public client ID lives in the `hashbin-client-id` meta tag.
   Preserve it unless the user supplies a replacement. Keep scripts out of HTML: the
-  Content-Security-Policy allows no inline script. The service worker serves only
-  hash-verified bytes; run `node scripts/update-offline.mjs` after shipped-file changes.
+  Content-Security-Policy allows only the pinned SDK sandbox bootstrap hash as inline script.
+  The service worker serves only hash-verified bytes; run `node scripts/update-offline.mjs` after shipped-file changes.
 - Keep the QR encoder's MIT notice and all vendored dependency notices.
 - Keep SVG sanitization before injection/export; preserve the last good plot on errors.
 - A source/example/CID URL replaces the localStorage plot only after the user confirms,

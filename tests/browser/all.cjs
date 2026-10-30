@@ -36,6 +36,63 @@ function cidFor(text) {
 async function run(label, task) { const start = Date.now(); await task(); console.log(`${name}: ${label} (${Date.now()-start} ms)`); }
 (async () => {
   browser = await ({ chromium, firefox, webkit }[name]).launch({ headless: true });
+  await run('actual plotting sandbox has an opaque origin and cannot read editor storage', async () => {
+    const { context: c, page: p } = await context();
+    await p.goto(base); await rendered(p);
+    assert.equal(await p.locator('iframe[title="Code sandbox"]').getAttribute('sandbox'), 'allow-scripts');
+    const result = await p.evaluate(async () => {
+      const cache = await caches.open('gnuplot-isolation-probe');
+      await cache.put('/private-sentinel', new Response('editor-only'));
+      await new Promise((resolve, reject) => {
+        const request = indexedDB.open('gnuplot-isolation-probe', 1);
+        request.onupgradeneeded = () => request.result.createObjectStore('secrets').put('editor-only', 'key');
+        request.onsuccess = () => { request.result.close(); resolve(); };
+        request.onerror = () => reject(request.error);
+      });
+      const probe = `
+        (async () => {
+          let cacheReadable = false, databaseReadable = false;
+          try { cacheReadable = await caches.has('gnuplot-isolation-probe'); } catch (_) {}
+          try {
+            databaseReadable = await new Promise(resolve => {
+              const request = indexedDB.open('gnuplot-isolation-probe');
+              request.onerror = () => resolve(false);
+              request.onsuccess = () => { request.result.close(); resolve(true); };
+            });
+          } catch (_) {}
+          postMessage({ probe: true, origin: self.origin, reported: hashbinSandbox.origin, cacheReadable, databaseReadable });
+        })();
+`;
+      const worker = GnuplotSandbox.factory({ fetchSource: async url => {
+        const response = await fetch(url);
+        if (!response.ok) throw new Error('Probe runtime load failed');
+        return (url.endsWith('gnuplot-worker.js') ? probe : '') + await response.text();
+      } })();
+      try {
+        return await new Promise((resolve, reject) => {
+          const timer = setTimeout(() => reject(new Error('Isolation probe timed out')), 15000);
+          let isolation;
+          worker.onerror = event => { clearTimeout(timer); reject(new Error(event.message)); };
+          worker.onmessage = ({ data }) => {
+            if (data.probe) isolation = data;
+            if (data.id === 99) {
+              clearTimeout(timer);
+              resolve({ isolation, svg: data.svg, error: data.error });
+            }
+          };
+          worker.postMessage({ id: 99, script: 'plot x', files: {}, options: {} });
+        });
+      } finally {
+        worker.terminate();
+        await caches.delete('gnuplot-isolation-probe');
+        indexedDB.deleteDatabase('gnuplot-isolation-probe');
+      }
+    });
+    assert.deepEqual(result.isolation, { probe: true, origin: 'null', reported: 'null', cacheReadable: false, databaseReadable: false });
+    assert.equal(result.error, undefined); assert.match(result.svg, /<svg/);
+    assert.equal(await p.locator('iframe[title="Code sandbox"]').count(), 1, 'probe termination removes its frame');
+    await c.close();
+  });
   await run('smoke, diagnostics, terminals and downloads', async () => {
     const { context: c, page: p } = await context();
     await p.goto(base); await rendered(p);
@@ -116,7 +173,7 @@ async function run(label, task) { const start = Date.now(); await task(); consol
       async disconnect(){localStorage.removeItem('hashbin:tokens:test-client');localStorage.setItem('test:revoked','yes');}
     }`;
     await auth.route('https://hashbin.org/sdk/v0.4.0/hashbin.js', route=>route.fulfill({contentType:'application/javascript',body:sdk}));
-    await auth.addInitScript(()=>{ if (!sessionStorage.getItem('test:seeded')) { sessionStorage.setItem('test:seeded','1'); localStorage.setItem('hashbin:tokens:test-client','{"refreshToken":"old"}'); } });
+    await auth.addInitScript(()=>{ if (window !== window.top) return; if (!sessionStorage.getItem('test:seeded')) { sessionStorage.setItem('test:seeded','1'); localStorage.setItem('hashbin:tokens:test-client','{"refreshToken":"old"}'); } });
     await a.goto(base); await rendered(a); await a.waitForFunction(()=>localStorage.getItem('test:revoked')==='yes' && !localStorage.getItem('hashbin:tokens:test-client'));
     const save=async()=>{await a.click('#hashbin-save'); await a.waitForFunction(()=>document.getElementById('hashbin-confirm').textContent==='Review on HashBin' && !document.getElementById('hashbin-confirm').disabled);};
     await edit(a,'set title "Popup save"\nplot x'); await a.waitForTimeout(300);
@@ -156,7 +213,7 @@ async function run(label, task) { const start = Date.now(); await task(); consol
         const pathname = decodeURIComponent(new URL(request.url, 'http://localhost').pathname);
         const file = path.resolve(root, '.' + (pathname.endsWith('/') ? pathname + 'index.html' : pathname));
         if (!file.startsWith(root + path.sep)) { response.writeHead(403).end(); return; }
-        const types = { '.html': 'text/html', '.js': 'application/javascript', '.css': 'text/css', '.svg': 'image/svg+xml', '.wasm': 'application/wasm', '.webmanifest': 'application/manifest+json', '.png': 'image/png' };
+        const types = { '.html': 'text/html', '.js': 'application/javascript', '.mjs': 'application/javascript', '.css': 'text/css', '.svg': 'image/svg+xml', '.wasm': 'application/wasm', '.webmanifest': 'application/manifest+json', '.png': 'image/png' };
         response.setHeader('Content-Type', types[path.extname(file)] || 'text/plain'); response.end(fs.readFileSync(file));
       } catch (_) { response.writeHead(404).end(); }
     });

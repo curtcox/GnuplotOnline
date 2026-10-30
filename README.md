@@ -79,7 +79,12 @@ npm run check
 
 No npm dependencies are needed to serve the application; Playwright is development-only.
 The engine loader and wasm are committed unchanged from `gnuplot-wasm@0.1.0`.
-The worker uses dynamic import because that package's loader is an ES module.
+The plotting worker runs in the pinned HashBin v0.4.0 SDK's opaque-origin sandbox,
+isolated from the editor's browser storage. The SDK is vendored byte for byte in
+`vendor/hashbin-sdk-v0.4.0.mjs` for verified offline use.
+The worker imports the unchanged ES module loader through the sandbox helper and
+receives WASM and support files through the parent's verified cache. It uses only
+an in-memory filesystem; hosted sandbox mode is not required.
 PostScript prologues/encoding maps omitted by the npm package are also vendored and
 mounted in the Emscripten filesystem. See [engine provenance](vendor/gnuplot/PROVENANCE.md).
 
