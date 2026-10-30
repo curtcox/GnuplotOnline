@@ -59,8 +59,8 @@ const HashBinDocuments = {
   }
 };
 
-/** Pinned to the immutable v0.3.0 release so a later SDK change cannot reach this app; upgrade deliberately. */
-const HASHBIN_SDK_URL = 'https://hashbin.org/sdk/v0.3.0/hashbin.js';
+/** Pinned to the immutable v0.4.0 release so a later SDK change cannot reach this app; upgrade deliberately. */
+const HASHBIN_SDK_URL = 'https://hashbin.org/sdk/v0.4.0/hashbin.js';
 
 /** Saves go through HashBin Publish, so this origin never holds a HashBin credential. */
 class HashBinStore {

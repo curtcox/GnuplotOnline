@@ -11,7 +11,7 @@ test('saves go through HashBin Publish with the pinned SDK and verify the return
  assert.equal((await store.publish(payload,snapshot)).cid,fullCID(payload));assert.deepEqual(options,{contentType:'application/json',clientState:{snapshot}});
  store.client.publish=async()=>({cid:fullCID(payload+' ')});await assert.rejects(store.publish(payload,snapshot),/does not match its CID/);
  await assert.rejects(new HashBinStore().init(),/registered client ID/);
- assert.match(require('node:fs').readFileSync(require('node:path').join(__dirname,'../src/hashbin.js'),'utf8'),/hashbin\.org\/sdk\/v0\.3\.0\/hashbin\.js/);
+ assert.match(require('node:fs').readFileSync(require('node:path').join(__dirname,'../src/hashbin.js'),'utf8'),/hashbin\.org\/sdk\/v0\.4\.0\/hashbin\.js/);
 });
 test('redirect saves restore source and files after approval or cancellation; legacy tokens are revoked',async()=>{
  const transactionStorage=storage(),snapshot={src:'plot x',files:{'x.dat':'1 2'},gnuplot:{width:640}},payload=Docs.serialize(snapshot);let outcome='approve';

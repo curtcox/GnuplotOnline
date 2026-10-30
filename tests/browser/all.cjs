@@ -86,7 +86,7 @@ async function run(label, task) { const start = Date.now(); await task(); consol
     await new Promise(resolve=>{const wait=()=>errors.some(e=>e.includes('example.invalid'))?resolve():setTimeout(wait,50);wait();});
     errors.splice(0,errors.length,...errors.filter(e=>!e.includes('example.invalid')));
     const registeredClient = /name="hashbin-client-id" content="([^"]+)"/.exec(fs.readFileSync('index.html','utf8'))[1];
-    await p.route('https://hashbin.org/sdk/v0.3.0/hashbin.js', route=>route.fulfill({ contentType:'application/javascript', body: `export class HashBinClient {
+    await p.route('https://hashbin.org/sdk/v0.4.0/hashbin.js', route=>route.fulfill({ contentType:'application/javascript', body: `export class HashBinClient {
       constructor(options) { if (options.clientId !== ${JSON.stringify(registeredClient)} || options.redirectUri !== ${JSON.stringify(new URL('./',base).href)}) throw new Error('Incorrect HashBin registration configuration'); }
     }` }));
     await p.click('#hashbin-save'); await p.waitForFunction(()=>document.getElementById('hashbin-confirm').textContent==='Review on HashBin' && !document.getElementById('hashbin-confirm').disabled); assert.match(await p.locator('#hashbin-message').innerText(),/approve the save on hashbin\.org/); await p.click('#hashbin-close');
@@ -115,7 +115,7 @@ async function run(label, task) { const start = Date.now(); await task(); consol
       async handlePublishCallback({hash}){const clientState=JSON.parse(sessionStorage.getItem('test:state'));return {cid:new URLSearchParams(hash.slice(1)).get('cid'),clientState};}
       async disconnect(){localStorage.removeItem('hashbin:tokens:test-client');localStorage.setItem('test:revoked','yes');}
     }`;
-    await auth.route('https://hashbin.org/sdk/v0.3.0/hashbin.js', route=>route.fulfill({contentType:'application/javascript',body:sdk}));
+    await auth.route('https://hashbin.org/sdk/v0.4.0/hashbin.js', route=>route.fulfill({contentType:'application/javascript',body:sdk}));
     await auth.addInitScript(()=>{ if (!sessionStorage.getItem('test:seeded')) { sessionStorage.setItem('test:seeded','1'); localStorage.setItem('hashbin:tokens:test-client','{"refreshToken":"old"}'); } });
     await a.goto(base); await rendered(a); await a.waitForFunction(()=>localStorage.getItem('test:revoked')==='yes' && !localStorage.getItem('hashbin:tokens:test-client'));
     const save=async()=>{await a.click('#hashbin-save'); await a.waitForFunction(()=>document.getElementById('hashbin-confirm').textContent==='Review on HashBin' && !document.getElementById('hashbin-confirm').disabled);};
