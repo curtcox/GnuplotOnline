@@ -17,6 +17,7 @@
   const currentLink = () => saved?.fingerprint === fingerprint() ? saved.link : links().fallback;
   const safeStorage = name => { try { return window[name]; } catch (_) { return undefined; } };
   const local = safeStorage('localStorage');
+  const drafts = new LocalDrafts({ storage: local, key: 'gnuplotonline:document', serialize: value => HashBinDocuments.serialize(value), parse: value => HashBinDocuments.parse(value) });
   const setError = message => { $('error').textContent = message; $('error').hidden = !message; $('preview').classList.toggle('stale', !!message); };
   const client = new GnuplotClient({ onSlow: () => { $('status').textContent = 'Still running…'; $('cancel').hidden = false; } });
   const scheduler = new RenderScheduler({ detect: () => {}, render: render, renderDelay: 350 });
@@ -79,9 +80,7 @@
       setError(error.message); $('status').textContent = 'Rendering stopped'; $('cancel').hidden = true;
     }
   }
-  function persist() {
-    try { local?.setItem('gnuplotonline:document', HashBinDocuments.serialize(snapshot())); } catch (_) { /* Storage can be unavailable or full; editing continues. */ }
-  }
+  function persist(edit = false) { drafts.attempt(snapshot(), edit === true); }
   function refreshShare({ address = false } = {}) {
     try {
       const url = currentLink(); $('share-url').value = url;
@@ -91,7 +90,7 @@
   }
   function changed() {
     if (applying) return;
-    revision++; client.cancel(); hashbin.cancelLoad(); shareClient.cancel(); saved = null;
+    revision++; client.cancel(); hashbin.cancelLoad(); shareClient.cancel(); saved = null; persist(true);
     $('share-status').textContent = ''; $('cancel').hidden = true; $('status').textContent = 'Waiting for edits…';
     clearTimeout(persistTimer);
     persistTimer = setTimeout(() => { persist(); refreshShare({ address: true }); }, 180);
@@ -104,29 +103,21 @@
     $('size').value = [...$('size').options].some(option => option.value === preset) ? preset : 'custom';
     $('custom-size').hidden = $('size').value !== 'custom';
   }
-  function apply(doc) {
+  function apply(doc, { run = true } = {}) {
+    clearTimeout(persistTimer); drafts.opened();
     const nextFiles = new DataFiles(doc.files || {}); DataFiles.validate(nextFiles.files, doc.src);
     applying = true;
     try { files = nextFiles; settings = GnuplotCore.options(doc.gnuplot); editor.setValue(doc.src, -1); editor.session.setUndoManager(new ace.UndoManager()); syncOptions(); }
     finally { applying = false; }
     revision++; scheduler.cancel(); client.cancel(); saved = null;
-    $('file-count').textContent = Object.keys(files.files).length; listFiles(); persist(); render();
+    $('file-count').textContent = Object.keys(files.files).length; listFiles(); if (run) render();
   }
   const shareClient = new ShareClient();
   const redirect = new URL('./', location.href); redirect.search = ''; redirect.hash = '';
   const store = new HashBinStore({ clientId: document.querySelector('meta[name="hashbin-client-id"]').content.trim(),
     redirectUri: redirect.href, storage: local, transactionStorage: safeStorage('sessionStorage') });
-  // Links can come from anyone; never let one silently replace work kept in this browser.
-  let linkLoad = false;
-  function acceptLink(doc) {
-    const same = (a, b) => a.src === b.src && JSON.stringify(a.files || {}) === JSON.stringify(b.files || {}), current = snapshot();
-    if (same(current, doc) || current.src === GnuplotExamples.defaultSource || GnuplotExamples.catalog.some(sample => same(current, { src: sample.source, files: sample.files || {} }))) return true;
-    if (confirm('This link opens a different plot. Replace the plot saved in this browser?\n\nChoose Cancel to keep your current work.')) return true;
-    refreshShare({ address: true });
-    return false;
-  }
   const hashbin = new HashBinPanel({ store, getSnapshot: snapshot, getFingerprint: fingerprint,
-    onLoad: (doc, cid) => { if (linkLoad && !acceptLink(doc)) return false; apply(doc); const link = HashBinDocuments.link(location.href, cid); saved = { fingerprint: fingerprint(), link }; history.replaceState(null, '', link); refreshShare(); },
+    onLoad: (doc, cid) => { apply(doc); const link = HashBinDocuments.link(location.href, cid); saved = { fingerprint: fingerprint(), link }; history.replaceState(null, '', link); refreshShare(); },
     onSaved: (_cid, value, link) => { saved = { fingerprint: value, link }; history.replaceState(null, '', link); refreshShare(); } });
   editor.session.on('change', changed);
   $('cancel').onclick = () => { revision++; scheduler.cancel(); client.cancel(); $('cancel').hidden = true; $('status').textContent = 'Cancelled'; };
@@ -244,17 +235,16 @@
   $('file-upload').onchange = async event => { await upload(event.target.files); event.target.value = ''; };
   $('editor-pane').addEventListener('dragover', event => { if (event.dataTransfer.types.includes('Files')) event.preventDefault(); });
   $('editor-pane').addEventListener('drop', event => { if (event.dataTransfer.files.length) { event.preventDefault(); event.stopPropagation(); upload(event.dataTransfer.files); } }, true);
+  drafts.mount($('extra-tools'), doc => { hashbin.cancelLoad(); apply(doc, { run: false }); refreshShare({ address: true }); $('status').textContent = 'Saved work restored — press Render.'; });
   window.addEventListener('pagehide', persist);
   window.addEventListener('offline-before-reload', persist);
   async function loadUrl({ initial = false } = {}) {
     hashbin.cancelLoad();
     try {
-      if (initial) {
-        store.retireLegacyTokens().catch(() => { /* Retried on the next load. */ });
-        let restored = null; try { const text = local?.getItem('gnuplotonline:document'); if (text) restored = HashBinDocuments.parse(text); } catch (_) { /* Ignore invalid or unavailable storage. */ }
-        const params = new URL(location.href).searchParams;
-        apply(restored || { src: GnuplotExamples.defaultSource, gnuplot: { width: params.get('w') || 800, height: params.get('h') || 600, background: params.get('bg') } });
-      }
+      clearTimeout(persistTimer); scheduler.cancel(); client.cancel(); revision++; saved = null;
+      drafts.opened(); applying = true; editor.setValue('', -1); applying = false;
+      pan?.destroy(); pan = null; result = null; $('preview').replaceChildren(); $('output').textContent = '';
+      if (initial) store.retireLegacyTokens().catch(() => {});
       const loadRevision = revision;
       const parsed = ShareLinks.parse(location.href, LZString.decompressFromEncodedURIComponent);
       if (parsed?.kind === 'publish') {
@@ -265,19 +255,19 @@
         if (published.cid && current) saved = { fingerprint: fingerprint(), link: HashBinDocuments.link(location.href, published.cid) };
         if (saved) history.replaceState(null, '', saved.link); else refreshShare({ address: true });
         $('hashbin-status').textContent = published.error || 'Saved to HashBin.';
-      } else if (parsed?.kind === 'source') { if (acceptLink(parsed)) apply(parsed); }
+      } else if (parsed?.kind === 'source') apply(parsed);
       else if (parsed?.kind === 'example') {
         const sample = GnuplotExamples.catalog.find(item => item.id === parsed.id);
         if (!sample) throw new Error('Unknown example. Choose a sample from the gallery.');
         const doc = { src: sample.source, files: sample.files || {} };
-        if (acceptLink(doc)) apply(doc);
+        apply(doc);
       } else if (parsed?.kind === 'cid') {
-        linkLoad = true;
-        try { await hashbin.load(parsed.cid); } finally { linkLoad = false; }
+        await hashbin.load(parsed.cid);
         return;
       }
+      if (!parsed) { const params = new URL(location.href).searchParams; apply({ src: GnuplotExamples.defaultSource, gnuplot: { width: params.get('w') || 800, height: params.get('h') || 600, background: params.get('bg') } }); }
       refreshShare();
-    } catch (error) { if (initial && !editor.getValue()) apply({ src: GnuplotExamples.defaultSource }); setError(error.message); }
+    } catch (error) { setError(error.message); }
   }
   window.addEventListener('hashchange', () => loadUrl());
   await loadUrl({ initial: true });

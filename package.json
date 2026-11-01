@@ -6,7 +6,8 @@
     "test": "node --test tests/*.test.js",
     "test:browser": "node tests/browser/all.cjs",
     "previews": "node scripts/render-gallery.mjs",
-    "check": "node scripts/check.mjs"
+    "check": "node scripts/check.mjs",
+    "test:urls": "node tests/browser/url-state.cjs"
   },
   "devDependencies": {
     "playwright": "1.64.1"

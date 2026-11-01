@@ -23,8 +23,7 @@ server. Serve the repository root over HTTP, never file://.
   The service worker serves only hash-verified bytes; run `node scripts/update-offline.mjs` after shipped-file changes.
 - Keep the QR encoder's MIT notice and all vendored dependency notices.
 - Keep SVG sanitization before injection/export; preserve the last good plot on errors.
-- A source/example/CID URL replaces the localStorage plot only after the user confirms,
-  unless the stored plot is a sample or the default. Guard asynchronous loads and
+- A source/example/CID URL loads independently of local drafts; retain saved work for explicit recovery. Guard asynchronous loads and
   renders against newer edits. Storage failure must not prevent editing.
 
 ## Validation and generated files
@@ -41,3 +40,7 @@ manifest. Offline installation is atomic: never claim readiness for an incomplet
 
 The user's current workflow is direct commits on `main` with frequent pushes.
 Deployment remains independent of tests. Avoid changing Pages settings unnecessarily.
+
+## URL identity and draft recovery
+
+Explicit program, source, example and CID URLs always load their document, independent of browser drafts. Never gate URL loading on a replacement confirmation. The bare homepage opens the default document. Preserve local drafts separately with LocalDrafts and offer Resume saved work. Opening or running a URL must not overwrite saved work; edits retain the previous draft for recovery. Keep stale-load guards and execution isolation.

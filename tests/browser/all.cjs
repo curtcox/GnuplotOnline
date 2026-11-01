@@ -131,10 +131,10 @@ async function run(label, task) { const start = Date.now(); await task(); consol
     await p.route('https://api.allorigins.win/**', route => route.fulfill({ json: { contents:'https://is.gd/test123' } }));
     await p.click('#shorten'); await p.waitForFunction(()=>document.getElementById('share-url').value==='https://is.gd/test123');
     // Uploaded data and settings survive localStorage restore in the same context.
-    await p.goto(base); await rendered(p); assert.equal(await p.locator('#file-count').innerText(),'1');
+    await p.goto(base); await rendered(p); await p.locator('#resume-work').evaluate(button=>button.click()); await p.click('#restore-work'); await p.waitForFunction(()=>!document.getElementById('draft-dialog').open); assert.equal(await p.locator('#file-count').innerText(),'1');
     await c.close();
   });
-  await run('HashBin inline CIDs, stale loads, links that ask first and mocked Publish saves', async () => {
+  await run('HashBin inline CIDs, stale loads, URL identity and recovery and mocked Publish saves', async () => {
     const { context: c, page: p } = await context();
     const bare='set title "CID plot"\nplot x', inline=cidFor(bare);
     await p.goto(base+'#'+inline); await rendered(p); assert.match(await p.locator('#preview').innerText(),/CID plot/);
@@ -152,9 +152,11 @@ async function run(label, task) { const start = Date.now(); await task(); consol
     await p.route('https://256t.us/'+remote,async route=>{await pending; await route.fulfill({body:payload})});
     await p.fill('#hashbin-cid',remote); await p.click('#hashbin-load'); await edit(p,'set title "Newer edit"\nplot cos(x)'); release();
     await p.waitForTimeout(250); assert.match(await p.evaluate(()=>editor.getValue()),/Newer edit/);
-    // A link that would replace work kept in this browser asks first.
-    await p.waitForTimeout(300); p.once('dialog',dialog=>dialog.dismiss()); await p.goto(base+'?example='+require('../../src/examples.js').catalog[1].id); await rendered(p);
-    assert.match(await p.evaluate(()=>editor.getValue()),/Newer edit/); assert.ok(!p.url().includes('example='));
+    // Local drafts cannot block a program URL; previous work is recoverable.
+    const previousDraft = await p.evaluate(() => localStorage.getItem('gnuplotonline:document'));
+    await p.goto(base+'?example='+require('../../src/examples.js').catalog[1].id); await rendered(p);
+    assert.equal(await p.evaluate(() => editor.getValue()), require('../../src/examples.js').catalog[1].source);
+    assert.equal(await p.evaluate(() => localStorage.getItem('gnuplotonline:document')), previousDraft);
     await c.close();
     const { context: auth, page: a }=await context();
     await auth.route(base+'**',async route=>{

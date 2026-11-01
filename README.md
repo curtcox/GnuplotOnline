@@ -25,7 +25,7 @@ production build step. GitHub Pages deploys this repository root on pushes to `m
   as datablocks to make a standalone script; computed filename expressions need manual editing.
 - Share the compressed URL, optionally shorten it through is.gd/AllOrigins, or make
   a QR code with SVG/PNG downloads. Source, files and size/background settings travel
-  together. Local work is restored from localStorage when a URL has no source.
+  together. Local drafts are recovered explicitly with **Resume saved work**.
 - After the status says **Available offline**, the editor, engine and full gallery
   work offline. Install the app through your browser's Add to Home Screen/Install action.
   New cached versions offer **Update and reload**; the current source is saved first.
@@ -160,3 +160,7 @@ This site is not affiliated with the gnuplot project.
 ## Canonical HashBin address
 
 The production app is [https://gnuplot.hashbin.page/](https://gnuplot.hashbin.page/). The GitHub Pages copy is kept for moving old drafts through **Move saved work** or **Download backup**. Transfers copy only this app's documents and public settings, keep the old copy, and never copy HashBin credentials or Python filesystem permissions. Deployment is managed by [HashBin's first-party deployment tool](https://github.com/curtcox/hashbin.org/blob/main/scripts/deploy-owned-apps.mjs).
+
+### URLs and saved work
+
+Program URLs always open the linked document, regardless of browser history or local drafts. The homepage opens the default example. Use **Resume saved work** in the editor controls to recover local drafts. Viewing or running a link keeps saved work; editing it retains the previous draft for recovery.
