@@ -1,6 +1,6 @@
 {
   "name": "fragment-kit",
-  "version": "0.2.0",
+  "version": "0.3.1",
   "description": "Buildless, browser-native tools for apps with state in URL fragments",
   "type": "module",
   "license": "MIT",

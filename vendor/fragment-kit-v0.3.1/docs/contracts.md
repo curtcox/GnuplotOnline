@@ -1,7 +1,7 @@
 # Runtime contracts
 
 Fragment Kit runs as native ES modules, without a build step. Import
-`vendor/fragment-kit-v0.2.0/src/index.js`; include `src/ui/kit.css` separately.
+`vendor/fragment-kit-v0.3.1/src/index.js`; include `src/ui/kit.css` separately.
 Node 22.12+ can also `require()` these modules. Execution engines, editor setup,
 document validation and sandbox isolation remain application responsibilities.
 
@@ -112,14 +112,14 @@ Generate `offline-assets.js` from an app allowlist with
 `prefix`, `files`, optional pinned `remote` URLs and `cdnFallbacks`. The worker is:
 
 ```js
-importScripts('offline-assets.js', 'vendor/fragment-kit-v0.2.0/src/offline/sw-core.js');
+importScripts('offline-assets.js', 'vendor/fragment-kit-v0.3.1/src/offline/sw-core.js');
 ```
 
 The manifest must load first. Atomic staging downloads and verifies every file
 before committing. Every cached response is verified on read. Status counts only
 the manifest; app package/voice caches remain separate. Optional
-`self.FragmentKitOfflineConfig = {extraCaches,cdnFallbacks,onMessage}` can preserve
-extra named caches and handle app messages. Every cache name must be prefixed.
+`self.FragmentKitOfflineConfig = {extraCaches,preserveCache,downloadConcurrency,cdnFallbacks,onMessage}` can preserve
+extra named caches and handle app messages. `preserveCache(name)` can retain app-owned cache families. Downloads use at most six concurrent requests by default; `downloadConcurrency` accepts 1–16. Manifest config `metadata` carries consumer fields and cannot override reserved kit fields. Metadata participates in the content version, and generated manifests also support Node CommonJS readers. Every cache name must be prefixed.
 `OfflineClient` exposes `init`, `status`, `repair`, `update`, `activateUpdate`.
 The app decides when a waiting worker activates and when to reload.
 

@@ -1,19 +1,19 @@
 {
   "dependencies": {
-    "index.html": "b131b46d096522707971e896eef1afb7e9d2f78402f3d1411176e2d314fa52bf",
+    "index.html": "dcd883d7ebef4c234e5d62ea6a044165489cbb0ca12e2d2255ecd5970a669fee",
     "fragment-kit.config.json": "fd13349414b57eb321ff615a6afd40a43f189ff735dba3eff18ce93b58cf11ec",
-    "src/gnuplot-sandbox.js": "b96c02bdf8eb0afec4cc67d8228e7fabb5150fda920b7ba1441dc5803888c96b",
-    "src/app.js": "9b258822c75598f97696acaafc9bf3bd4268d160ca77a07df8a1654a54e2f2a7",
+    "src/gnuplot-sandbox.js": "d13f1e018d634fa39a371ee55291b0d24e96d0da86c1f6ffb48bb17707e3f5b5",
+    "src/app.js": "7a00fb245dab1fd63aa088717f77a62f1c7c6c43d7ab38ddb6498afcbaa976ec",
     "src/app.css": "baece7e8c7d1abbdb65bb2f768f0eb8cf241fe668b97e9ae5b4947c1b1255806",
-    "src/fragment-config.mjs": "f4e955727b1977fb9ab786e77dd6f7a626131c3b517e8c81e9a9d38c995fa47b",
+    "src/fragment-config.mjs": "15d5568b272372c5c94ae1978191245b3601422d28cc43fffa0a1183f545d4f1",
     "src/examples.js": "d87eb3d4dcdaf7eea49e505d218e230ccad835d2c91496a9188c2bb977823a62",
     "src/gnuplot-core.js": "8460e8e5b7eec0666dfc44139139a17ecf00d027eded30b1b16a5f18885647c4",
     "vendor/gnuplot/gnuplot.js": "72fbcf1029670ea7453eafacefbff36f3c21a8a42b15fae9030144344425f7b2",
     "vendor/gnuplot/gnuplot.wasm": "b100192974f908250b67c02d1131e270b74e74bc8f80fab1d2fd1adaf0f3fbe0",
-    "vendor/fragment-kit-v0.2.0/src/core/url-state.js": "5cd6bc5fcf217805fa463c7829441f265e77dbd98c210660b6dfbe6df238d6de",
-    "vendor/fragment-kit-v0.2.0/vendor/hashbin-sdk-v0.4.0.mjs": "82f25ffe41a0ff79a060fb593754a286e1c85c2502878ab387c3d0045b749fa5"
+    "vendor/fragment-kit-v0.3.1/src/core/url-state.js": "5cd6bc5fcf217805fa463c7829441f265e77dbd98c210660b6dfbe6df238d6de",
+    "vendor/fragment-kit-v0.3.1/vendor/hashbin-sdk-v0.4.0.mjs": "82f25ffe41a0ff79a060fb593754a286e1c85c2502878ab387c3d0045b749fa5"
   },
-  "renderer": "8ef7cb5e0311d6ebeebb6af5c8319d60befcf39d2556c8645c4c5a3e23ac7bb6",
+  "renderer": "21a0bb3423fdbedea3356ba71b38d1e2b5f8f20242c79c1ddfefa579de8e3b52",
   "examples": {
     "damped-wave": {
       "document": "9af53827a1ff74dd3b016262e8dcdad794965588c57e3fdcdc5223c4b2832fb8",
@@ -29,7 +29,7 @@
     },
     "histogram": {
       "document": "78853bd3957b822968ce6ee164158a1496ea7ffedd4afc70215a79bdbf8b421b",
-      "cover": "3d997eab71032ce4f5bdc331b23d3af2ec4850272577742d850d5e9f3a826c9b"
+      "cover": "4c25918b7af937d5adf4281f9478c9a176e13ff96e2435472ab85530432e0bdc"
     },
     "error-bars": {
       "document": "75ac864151c9beb46613e027100bc5e1c5d5b46d8eaa1a47600a201b3e7e6f98",

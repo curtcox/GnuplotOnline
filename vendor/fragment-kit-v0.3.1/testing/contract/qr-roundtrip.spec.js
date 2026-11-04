@@ -48,6 +48,6 @@ test('scanning arbitrary text never navigates', async ({ page }) => {
   }, adapter.kitURL);
   await page.locator(adapter.qr).click();
   await page.locator('#qr-image').setInputFiles({ name: 'text.png', mimeType: 'image/png', buffer: Buffer.from(image) });
-  await expect(page.getByRole('button', { name: 'Copy text', exact: true })).toBeVisible();
+  await expect(page.locator(adapter.qrDialog).getByRole('button', { name: 'Copy text', exact: true })).toBeVisible();
   await expect(page.locator('.fk-scanned')).toContainText('javascript:alert(1)');
 });

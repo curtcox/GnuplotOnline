@@ -14,3 +14,7 @@ suites pass in Chromium and WebKit. Firefox must run on GitHub because the local
 This branch has not been merged or deployed. After merge, verify recovery and
 canonical origins with five corpus links, a CID, QR image load, offline reload
 and the 360px layout. The reusable Pages workflow verifies the deployment marker.
+
+A hosting follow-up pins v0.3.1 for its CommonJS-readable generated manifest,
+regenerates the HashBin-owned notice before hashing, ignores late navigation
+events for consumed callbacks and exposes failed CID loads in the main status.

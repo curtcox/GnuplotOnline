@@ -1,7 +1,7 @@
 export default {
   ready: 'body[data-ready="true"]', editor: '#editor', status: '#status', draftKey: 'gnuplotonline:document',
   more: '#more', share: '#share', qr: '#qr-open', tabs: ['Code', 'Preview'], example: 'damped-wave',
-  kitURL: './vendor/fragment-kit-v0.2.0/src/index.js', cachePrefix: 'gnuplot-', offlineAsset: 'src/app.css',
+  kitURL: './vendor/fragment-kit-v0.3.1/src/index.js', cachePrefix: 'gnuplot-', offlineAsset: 'src/app.css',
   isWrittenURL: href => { const u = new URL(href); return u.searchParams.has('compressed') || u.searchParams.has('doc'); },
   getSource: page => page.evaluate(() => editor.getValue()),
   getDocument: page => page.evaluate(() => ({ src: editor.getValue() })),
