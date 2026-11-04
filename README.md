@@ -164,3 +164,15 @@ The production app is [https://gnuplot.hashbin.page/](https://gnuplot.hashbin.pa
 ### URLs and saved work
 
 Program URLs always open the linked document, regardless of browser history or local drafts. The homepage opens the default example. Use **Resume saved work** in the editor controls to recover local drafts. Viewing or running a link keeps saved work; editing it retains the previous draft for recovery.
+
+## Shared browser tools
+
+This migration uses [Fragment Kit v0.2.0](https://github.com/curtcox/Tools-for-pages-with-state-in-URL-fragments/releases/tag/v0.2.0)
+for URL readers, verified HashBin loads/Publish, QR generation and camera/image
+scanning, drafts, sharing, offline verification, mobile tabs, dialogs and gallery.
+The document adapter and legacy URL writer are in `src/fragment-config.mjs`.
+New links continue to use the existing query forms while v1 readers roll out.
+
+Serve the root, then generate covers with `npm run previews`. Use
+`node scripts/render-gallery.mjs --check` for a browser-free fingerprint check.
+Migration acceptance and deployed checks are recorded in `docs/fragment-kit-migration.md`.

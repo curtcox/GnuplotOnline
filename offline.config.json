@@ -1,0 +1,22 @@
+{
+  "prefix": "gnuplot",
+  "files": [
+    "index.html",
+    "gallery.html",
+    "icon.svg",
+    "manifest.webmanifest",
+    "svg-pan-zoom.min.js",
+    "service-worker.js",
+    "LICENSE-graphvizonline",
+    "LICENSE-svg-pan-zoom",
+    "src",
+    "ace",
+    "examples",
+    "gallery/previews",
+    "icons",
+    "vendor/gnuplot",
+    "vendor/fragment-kit-v0.2.0/src",
+    "vendor/fragment-kit-v0.2.0/vendor",
+    "fragment-kit.config.json"
+  ]
+}

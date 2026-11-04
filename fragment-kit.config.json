@@ -1,0 +1,12 @@
+{
+  "slug": "gnuplot",
+  "name": "Gnuplot Online",
+  "storagePrefix": "gnuplotonline",
+  "canonicalOrigin": "https://gnuplot.hashbin.page/",
+  "recoveryOrigin": "https://curtcox.github.io/GnuplotOnline/",
+  "repo": "curtcox/GnuplotOnline",
+  "docs": "https://gnuplot.info/docs_6.0/loc1.html",
+  "gallery": "gallery.html",
+  "documentType": "gnuplot",
+  "sandboxBootstrapHash": "sha256-IMEqdP+AkCKdxhM3X7mQM4pV/chykJXPvdtndD+XeH8="
+}

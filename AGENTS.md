@@ -1,7 +1,6 @@
 # Gnuplot Online
 
-This is a buildless static GitHub Pages application. Use plain JavaScript with browser
-globals and CommonJS exports for shared modules. Do not add a production bundler or
+This is a buildless static GitHub Pages application. Use browser-native ES modules for Fragment Kit and retain CommonJS exports for app-owned engine modules. Shared contracts are in `vendor/fragment-kit-v0.2.0/docs/contracts.md`. Do not add a production bundler or
 server. Serve the repository root over HTTP, never file://.
 
 ## Important contracts
@@ -38,9 +37,24 @@ covers. Keep `examples/*.gp`/data synchronized with `src/examples.js`. After cha
 any shipped assets, run `node scripts/update-offline.mjs`; commit the content-versioned
 manifest. Offline installation is atomic: never claim readiness for an incomplete cache.
 
-The user's current workflow is direct commits on `main` with frequent pushes.
-Deployment remains independent of tests. Avoid changing Pages settings unnecessarily.
+The Fragment Kit migration is isolated on its own branch and PR.
+The reusable Pages deployment is gated by the shared contracts and actual engine tests. Avoid changing Pages settings unnecessarily.
 
 ## URL identity and draft recovery
 
 Explicit program, source, example and CID URLs always load their document, independent of browser drafts. Never gate URL loading on a replacement confirmation. The bare homepage opens the default document. Preserve local drafts separately with LocalDrafts and offer Resume saved work. Opening or running a URL must not overwrite saved work; edits retain the previous draft for recovery. Keep stale-load guards and execution isolation.
+
+## Shared kit
+
+Pin Fragment Kit v0.2.0 byte for byte. Do not edit files under its vendor folder.
+`fragment-kit.config.json` is the app config; the registered HashBin client ID
+stays in the existing meta tag. Schema validation, data files, opaque-origin
+execution, timeouts, SVG sanitization and export stay app-owned.
+Keep the existing `gnuplotonline:document` draft key and `gnuplot-` cache prefix.
+`legacyWriter` deliberately retains the old compressed/doc query format until
+all ten consumers have shipped v1 readers; the pilot already reads v1 links.
+Run the shared contract suite through `testing-contract.config.mjs`, the actual
+WASM suites in `tests/browser/all.cjs`, and URL/recovery checks in all engines.
+The shared gallery renderer needs an HTTP server only when generating covers;
+`--check` validates fingerprints without launching a browser. Original SVGs in
+`tests/fixtures/original-covers` continue to verify native engine output.

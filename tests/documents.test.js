@@ -2,10 +2,11 @@ const { test } = require('node:test');
 const assert = require('node:assert/strict');
 const DataFiles = require('../src/data-files.js');
 const PlotExport = require('../src/export.js');
-const { HashBinDocuments: D, HashBinStore } = require('../src/hashbin.js');
-const { ShareLinks, ShareClient } = require('../src/share-links.js');
-const LZ = require('../vendor/lz-string.min.js');
-const { encodeQr, qrNotes } = require('../src/qr.js');
+const { HashBinDocuments: D, HashBinStore } = require('../src/fragment-config.mjs');
+const { ShareLinks, ShareClient } = {ShareLinks: {build:({url,...doc})=>require('../src/fragment-config.mjs').urlState.build(doc,{url}),parse:url=>{const intent=require('../src/fragment-config.mjs').urlState.parse(url);return {...intent,...intent.doc}}},ShareClient:require('../vendor/fragment-kit-v0.2.0/src/share/shortener.js').ShareClient};
+const LZ = {compressToEncodedURIComponent:require('../src/fragment-config.mjs').compress,decompressFromEncodedURIComponent:require('../src/fragment-config.mjs').decompress};
+const { encodeQr, qrNotes } = require('../vendor/fragment-kit-v0.2.0/src/qr/encode.js');
+D.isCID = require('../vendor/fragment-kit-v0.2.0/src/core/cid.js').isCID;
 const { createHash } = require('node:crypto');
 const doc = { src: "plot 'data.dat' using 1:2", files: { 'data.dat': '1 2\n2 4' }, gnuplot: { width: 640, height: 480, background: 'transparent' } };
 test('documents preserve source, files, settings and plain or unknown payloads', () => {
@@ -13,7 +14,7 @@ test('documents preserve source, files, settings and plain or unknown payloads',
   assert.equal(parsed.src, doc.src); assert.deepEqual(parsed.files, doc.files); assert.equal(parsed.gnuplot.width, 640);
   assert.equal(D.parse('plot x').src, 'plot x');
   const unknown = JSON.stringify({ format: 'hashbin-diagram', version: 1, type: 'other', src: 'plot x' });
-  assert.equal(D.parse(unknown).src, unknown);
+  assert.throws(() => D.parse(unknown), /Saved document is for/);
   assert.throws(() => D.serialize({ src: 'x'.repeat(D.MAX_BYTES), files: {} }), /limit/);
   assert.throws(() => D.parse(JSON.stringify({ ...JSON.parse(D.serialize(doc)), version: 9 })), /version/);
 });

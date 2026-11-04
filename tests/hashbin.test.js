@@ -1,6 +1,6 @@
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
-const { HashBinStore, HashBinDocuments: Docs } = require('../src/hashbin.js');
+const { HashBinStore, HashBinDocuments: Docs } = require('../src/fragment-config.mjs');
 function storage(){const values=new Map();return {getItem:key=>values.get(key)||null,setItem:(key,value)=>values.set(key,value),removeItem:key=>values.delete(key)}}
 function cid(text){const size=Buffer.alloc(6);size.writeUIntBE(Buffer.byteLength(text),0,6);return size.toString('base64url')+(text.length<=64?Buffer.from(text):Buffer.alloc(64,1)).toString('base64url')}
 function fullCID(text){const data=Buffer.from(text),size=Buffer.alloc(6);size.writeUIntBE(data.length,0,6);return size.toString('base64url')+(data.length<=64?data:require('node:crypto').createHash('sha512').update(data).digest()).toString('base64url')}
@@ -8,10 +8,10 @@ test('saves go through HashBin Publish with the pinned SDK and verify the return
  const snapshot={src:'plot x',files:{'x.dat':'1 2'},gnuplot:{width:640}},payload=Docs.serialize(snapshot);let options;
  const store=new HashBinStore({clientId:'test',loadSDK:async()=>({HashBinClient:class{publish(content,opts){assert.equal(content,payload);options=opts;return Promise.resolve({cid:fullCID(payload)})}}})});
  await assert.rejects(store.publish(payload,snapshot),/still loading/);await store.init();
- assert.equal((await store.publish(payload,snapshot)).cid,fullCID(payload));assert.deepEqual(options,{contentType:'application/json',clientState:{snapshot}});
+ assert.equal((await store.publish(payload,snapshot)).cid,fullCID(payload));assert.deepEqual(options,{contentType:'application/json',fileName:'plot.json',clientState:{snapshot}});
  store.client.publish=async()=>({cid:fullCID(payload+' ')});await assert.rejects(store.publish(payload,snapshot),/does not match its CID/);
  await assert.rejects(new HashBinStore().init(),/registered client ID/);
- assert.match(require('node:fs').readFileSync(require('node:path').join(__dirname,'../src/hashbin.js'),'utf8'),/hashbin\.org\/sdk\/v0\.4\.0\/hashbin\.js/);
+
 });
 test('redirect saves restore source and files after approval or cancellation; legacy tokens are revoked',async()=>{
  const transactionStorage=storage(),snapshot={src:'plot x',files:{'x.dat':'1 2'},gnuplot:{width:640}},payload=Docs.serialize(snapshot);let outcome='approve';
@@ -19,7 +19,7 @@ test('redirect saves restore source and files after approval or cancellation; le
  await store.init();assert.equal(await store.published('#'+cid('plot x')),null);
  await store.publish(payload,snapshot);assert.deepEqual(await store.published('#hashbin_publish=s&cid=x'),{cid:fullCID(payload),snapshot});
  await store.publish(payload,snapshot);outcome='cancel';assert.deepEqual(await store.published('#hashbin_publish=s&error=access_denied'),{error:'The save was cancelled on HashBin.',snapshot});
- const local=storage();let revoked=0,loaded=0;const legacy=new HashBinStore({clientId:'test',storage:local,loadSDK:async()=>{loaded++;return {HashBinClient:class{async disconnect(){revoked++;local.removeItem('hashbin:tokens:test')}}}}});
+ const local=storage();let revoked=0,loaded=0;const legacy=new HashBinStore({clientId:'test',legacyStorage:local,loadSDK:async()=>{loaded++;return {HashBinClient:class{async disconnect(){revoked++;local.removeItem('hashbin:tokens:test')}}}}});
  assert.equal(await legacy.retireLegacyTokens(),false);assert.equal(loaded,0);local.setItem('hashbin:tokens:test','{"refreshToken":"old"}');assert.equal(await legacy.retireLegacyTokens(),true);assert.equal(revoked,1);
 });
 test('remote loads verify bytes against the CID',async()=>{

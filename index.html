@@ -1,11 +1,12 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8"><meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-IMEqdP+AkCKdxhM3X7mQM4pV/chykJXPvdtndD+XeH8=' blob: 'wasm-unsafe-eval' https://cdnjs.cloudflare.com/ajax/libs/lz-string/1.5.0/ https://hashbin.org/sdk/v0.4.0/; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; font-src 'self' data:; connect-src 'self' https://256t.us https://hashbin.org https://api.allorigins.win; worker-src 'self' blob:; frame-src 'self'; object-src 'none'; base-uri 'self'; form-action 'none'"><meta name="viewport" content="width=device-width, initial-scale=1">
+<meta charset="utf-8"><meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-IMEqdP+AkCKdxhM3X7mQM4pV/chykJXPvdtndD+XeH8=' blob: 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; font-src 'self' data:; connect-src 'self' https://256t.us https://hashbin.org https://api.allorigins.win; worker-src 'self' blob:; frame-src 'self'; object-src 'none'; base-uri 'self'; form-action 'none'"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#087e8b"><meta name="description" content="Write gnuplot scripts and see plots live in your browser. No server, free and available offline.">
 <meta name="hashbin-client-id" content="app_69800851-cef2-4274-9c7b-b1e908965181"><!-- Public OAuth client ID; not a secret. -->
+<meta name="fragment-kit" content="gnuplot-fragment-kit-v0.2.0">
 <title>Gnuplot Online — plot in your browser</title>
-<link rel="icon" href="icon.svg"><link rel="apple-touch-icon" href="icons/icon-180.png"><link rel="manifest" href="manifest.webmanifest"><link rel="stylesheet" href="src/app.css?v=1">
+<link rel="icon" href="icon.svg"><link rel="apple-touch-icon" href="icons/icon-180.png"><link rel="manifest" href="manifest.webmanifest"><link rel="stylesheet" href="vendor/fragment-kit-v0.2.0/src/ui/kit.css"><link rel="stylesheet" href="src/app.css?v=2">
 </head>
 <body data-tab="preview">
 <header><div class="brand"><span class="brand-mark" aria-hidden="true">∿</span><div><h1>Gnuplot Online</h1><small>IDEAS INTO PLOTS</small></div></div><p class="tagline">A little code. A clearer picture.</p><a class="github" href="https://github.com/curtcox/GnuplotOnline" target="_blank" rel="noopener" aria-label="Fork Gnuplot Online on GitHub">Fork on GitHub ↗</a></header>
@@ -14,14 +15,14 @@
 <label>Size <select id="size" aria-label="Plot size"><option>640×480</option><option selected>800×600</option><option>1000×500</option><option>1200×800</option><option value="custom">Custom</option></select></label>
 <span id="custom-size" hidden><input id="width" aria-label="Width" type="number" min="100" max="4096" value="800">×<input id="height" aria-label="Height" type="number" min="100" max="4096" value="600"></span>
 <label class="background-label">Background <select id="background"><option value="white">White</option><option value="transparent">Transparent</option></select></label>
-<button id="data-open">Data files <span class="badge" id="file-count">0</span></button>
+<button id="render">Render</button><button id="data-open">Data files <span class="badge" id="file-count">0</span></button>
 <button id="more" aria-expanded="false" aria-controls="extra-tools">More</button>
 <div class="extra-tools" id="extra-tools">
 <select id="export-format" aria-label="Download format"><option value="svg">SVG</option><option value="png">PNG (2×)</option><option value="text">Text output</option><option value="source">Source (.gp)</option><option value="inline">Script + inlined data</option><option value="other">Terminal file</option></select><button id="download">Download</button>
-<button id="share" class="primary">Share</button><input id="share-url" class="link-field" aria-label="Share URL" readonly placeholder="A link to this plot"><button id="shorten">Shorten link</button><button id="qr-open">QR code</button>
+<button id="share" class="primary">Share</button><button id="qr-open">QR code</button>
 <button id="hashbin-save">Save to HashBin</button><input class="cid" id="hashbin-cid" aria-label="HashBin CID or URL" placeholder="CID or saved link"><button id="hashbin-load">Load from HashBin</button>
 <a href="http://gnuplot.info/docs_6.0/loc1.html" target="_blank" rel="noopener">Docs ↗</a><a href="https://gnuplot.sourceforge.net/docs_6.0/Gnuplot_6.0.pdf" target="_blank" rel="noopener">PDF ↗</a><a href="https://gnuplot.sourceforge.net/demo_6.0/" target="_blank" rel="noopener">Official demos ↗</a><a href="gallery.html">Sample gallery ↗</a>
-<span id="share-status" role="status"></span><span id="hashbin-status" role="status"></span>
+<span id="hashbin-status" role="status"></span>
 </div></div>
 <main class="workspace">
 <section id="editor-pane" aria-label="Code editor"><div class="pane-heading"><span class="filename">script.gp <span class="hint">/ gnuplot</span></span><button id="hide-editor">Hide editor</button></div><div id="editor" aria-label="Gnuplot source code"></div></section>
@@ -32,7 +33,7 @@
 <dialog id="data-dialog" aria-labelledby="data-title"><h2 id="data-title">Data files</h2><p class="hint">UTF-8 text · 2 MiB per file · 5 MiB total. Use <code>plot 'name.dat' using 1:2</code>. You can also drop files onto the editor.</p><div id="file-list"></div><div class="dialog-actions"><button id="file-new">New file</button><button id="file-add">Add file</button><input id="file-upload" type="file" multiple hidden><button data-close="data-dialog">Done</button></div><div id="file-editor" hidden><label for="file-name">Filename</label><input id="file-name" placeholder="data.dat" maxlength="64"><label for="file-text">Data</label><textarea id="file-text" spellcheck="false"></textarea><div class="dialog-actions"><button id="file-save" class="primary">Save file</button><button id="file-cancel">Cancel edit</button></div></div><p id="data-message" role="status"></p></dialog>
 <dialog id="qr-dialog" aria-labelledby="qr-title"><h2 id="qr-title">Take your plot with you</h2><div id="qr-code"></div><p id="qr-message"></p><p id="qr-url"></p><div class="dialog-actions"><button id="qr-svg">Download QR (SVG)</button><button id="qr-png">Download QR (PNG)</button><button data-close="qr-dialog">Close</button></div></dialog>
 <dialog id="hashbin-dialog" aria-labelledby="hashbin-title"><h2 id="hashbin-title">Save to HashBin</h2><p id="hashbin-message" role="status"></p><div class="dialog-actions"><button id="hashbin-close">Close</button><button id="hashbin-confirm" class="primary">Review on HashBin</button></div></dialog>
-<script src="ace/ace.js?v=1"></script><script src="ace/theme-tomorrow.js?v=1"></script><script src="ace/ext-language_tools.js?v=1"></script><script src="src/mode-gnuplot.js?v=1"></script><script src="svg-pan-zoom.min.js?v=1"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/lz-string/1.5.0/lz-string.min.js"></script><script src="src/lz-fallback.js?v=1"></script>
-<script src="src/gnuplot-core.js?v=1"></script><script src="src/gnuplot-sandbox.js?v=1"></script><script src="src/gnuplot-client.js?v=1"></script><script src="src/render-scheduler.js?v=1"></script><script src="src/data-files.js?v=1"></script><script src="src/export.js?v=1"></script><script src="src/hashbin.js?v=1"></script><script src="src/hashbin-panel.js?v=1"></script><script src="src/share-links.js?v=1"></script><script src="src/qr.js?v=1"></script><script src="src/examples.js?v=1"></script><script src="src/local-drafts.js?v=1"></script><script src="src/app.js?v=1"></script><script src="src/offline.js?v=1"></script>
+<script src="ace/ace.js?v=1"></script><script src="ace/theme-tomorrow.js?v=1"></script><script src="ace/ext-language_tools.js?v=1"></script><script src="src/mode-gnuplot.js?v=1"></script><script src="svg-pan-zoom.min.js?v=1"></script>
+<script src="src/gnuplot-core.js?v=1"></script><script src="src/gnuplot-sandbox.js?v=1"></script><script src="src/gnuplot-client.js?v=1"></script><script src="src/data-files.js?v=1"></script><script src="src/export.js?v=1"></script><script src="src/examples.js?v=1"></script><script type="module" src="src/app.js?v=2"></script><script type="module" src="src/offline-ui.mjs"></script>
 <script type="module" src="src/domain-migration.js"></script>
 </body></html>
