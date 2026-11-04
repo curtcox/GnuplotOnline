@@ -1,0 +1,209 @@
+{
+  "repo": "GnuPlotOnline",
+  "slug": "gnuplot",
+  "commit": "99f5f52bb69a9d7afec9a15d9f34ef5d9ddab845",
+  "example": {
+    "id": "damped-wave",
+    "source": "# A function and a few observations\nset title \"A little signal, a little noise\" font \",18\"\nset xlabel \"Time (s)\"\nset ylabel \"Amplitude\"\nset grid back lc rgb \"#e2eaed\"\nset border 3 lc rgb \"#718994\"\nset tics nomirror\nset key top right\nset xrange [0:10]\nf(x) = sin(x) * exp(-x/8)\n$observations << EOD\n0.5 0.52\n1.5 0.77\n2.5 0.49\n3.5 -0.18\n4.5 -0.55\n5.5 -0.39\n6.5 0.16\n7.5 0.42\n8.5 0.31\n9.5 -0.08\nEOD\nplot f(x) title \"Damped wave\" with lines lw 3 lc rgb \"#087e8b\", \\\n     $observations title \"Observations\" with points pt 7 ps 1.2 lc rgb \"#e49c46\"",
+    "raw": "{\"format\":\"hashbin-diagram\",\"version\":1,\"type\":\"gnuplot\",\"src\":\"# A function and a few observations\\nset title \\\"A little signal, a little noise\\\" font \\\",18\\\"\\nset xlabel \\\"Time (s)\\\"\\nset ylabel \\\"Amplitude\\\"\\nset grid back lc rgb \\\"#e2eaed\\\"\\nset border 3 lc rgb \\\"#718994\\\"\\nset tics nomirror\\nset key top right\\nset xrange [0:10]\\nf(x) = sin(x) * exp(-x/8)\\n$observations << EOD\\n0.5 0.52\\n1.5 0.77\\n2.5 0.49\\n3.5 -0.18\\n4.5 -0.55\\n5.5 -0.39\\n6.5 0.16\\n7.5 0.42\\n8.5 0.31\\n9.5 -0.08\\nEOD\\nplot f(x) title \\\"Damped wave\\\" with lines lw 3 lc rgb \\\"#087e8b\\\", \\\\\\n     $observations title \\\"Observations\\\" with points pt 7 ps 1.2 lc rgb \\\"#e49c46\\\"\",\"gnuplot\":{\"width\":640,\"height\":480,\"background\":\"transparent\"},\"files\":{\"values.dat\":\"1 2\\n2 3\"}}",
+    "expected": {
+      "src": "# A function and a few observations\nset title \"A little signal, a little noise\" font \",18\"\nset xlabel \"Time (s)\"\nset ylabel \"Amplitude\"\nset grid back lc rgb \"#e2eaed\"\nset border 3 lc rgb \"#718994\"\nset tics nomirror\nset key top right\nset xrange [0:10]\nf(x) = sin(x) * exp(-x/8)\n$observations << EOD\n0.5 0.52\n1.5 0.77\n2.5 0.49\n3.5 -0.18\n4.5 -0.55\n5.5 -0.39\n6.5 0.16\n7.5 0.42\n8.5 0.31\n9.5 -0.08\nEOD\nplot f(x) title \"Damped wave\" with lines lw 3 lc rgb \"#087e8b\", \\\n     $observations title \"Observations\" with points pt 7 ps 1.2 lc rgb \"#e49c46\"",
+      "files": {
+        "values.dat": "1 2\n2 3"
+      },
+      "gnuplot": {
+        "width": 640,
+        "height": 480,
+        "background": "transparent",
+        "font": "sans-serif,12",
+        "fontscale": 1
+      }
+    }
+  },
+  "sourceFiles": {
+    "README.md": "c72ef28848991e98425d30de71fd6a8d70ba709dfb5237cf857707b51b13b5a0",
+    "index.html": "efec43ed40bbb39f6b3293b4aef4b431bfc84ade420ef1c96bc75a39c08925c2",
+    "offline-assets.js": "f05156a7c3b1fb4958ff99fb2d565381f5ddd74848a1a5363b7e57f2f7838442",
+    "service-worker.js": "2aed677adc2ef8b6796485d713ebbca96adfcc6208b78f81a420f72f90f57cde",
+    "src/app.js": "a57e58180bd412b6a814d042e0c42825d0dcd581565b52c2871f408f3149ac22",
+    "src/data-files.js": "5167582cae385288013db5f99cec41e63ddadc045e0d44be51716119562f336b",
+    "src/domain-migration.js": "220464e56996e52965418130af0ce95b5a49a54a44241d76b07888a21e6b5cda",
+    "src/examples.js": "d87eb3d4dcdaf7eea49e505d218e230ccad835d2c91496a9188c2bb977823a62",
+    "src/export.js": "f2a7314b7fe030cd38ab4081a6c2ba37f33f16464069678fc955272cf07a4d31",
+    "src/gallery.js": "6a9f1ba5f9a290c118bbe389c363689244583e92fe6ec460815db24ba1ba7224",
+    "src/gnuplot-client.js": "e5dbd5e294f32082917c1c3921f06c36a2d1a74d355a018e712246e72a6b28fb",
+    "src/gnuplot-core.js": "8460e8e5b7eec0666dfc44139139a17ecf00d027eded30b1b16a5f18885647c4",
+    "src/gnuplot-sandbox.js": "ed6f1d4df6cd4671c6839cd72dc67809598f09c32b53eeff8a0e2ae92a5d4271",
+    "src/gnuplot-worker.js": "f0b05f95356da7f30b0048fef84ba6f29dfe1bd2f115563bcae3b25a54f395dd",
+    "src/hashbin-panel.js": "f94903a085185ad30f9617a73b3382856b1f58555bf0c0b0a4ba9056598932fc",
+    "src/hashbin.js": "78dfe50bba68645f074901afb6b78a4131b47af6a4186211c497fd08f249aa8e",
+    "src/local-drafts.js": "63b3e2ab8ad18a3088ff40386bb64e3a2d133ae32fbc7968a662b9069023cb85",
+    "src/lz-fallback.js": "e6725fa9172ff859cd5b24e5d74ac516046bf7957b3ee71a99a61e7b5d0c7f58",
+    "src/mode-gnuplot.js": "d6c8a6f075ce6a6c8110834eb296b7dfe38f60ea1d70e12d823829d1c99cb673",
+    "src/offline.js": "208bf7c711b8937db5a84c34cb11908bfd994ea201657aae1f7a35ddcb48eaac",
+    "src/qr.js": "a6821da15236196ed734bc65c81ad0ddc03ef363e3b61dd7f550335114961921",
+    "src/render-scheduler.js": "2ca91d13be1f761a79427318a6096cfb55f6b15954d67047704e12c824e253a1",
+    "src/share-links.js": "853294b58a7ddecc124236ab488e925087170d302f15eb4bb1310732d511b3e1",
+    "tests/browser/all.cjs": "18922436489b9f44bd29e60f938aa7bdf256c2fb2ca519c147219c3f662e038a",
+    "tests/browser/url-state.cjs": "c620eafd1447305035bec5ad7d61e86ce3480cf3349bc00da241960e5ed2d835",
+    "tests/client.test.js": "3779b9983b05244865ce6e068aeff5e7a3a635826dda7ec42fd64f58f83bd9a4",
+    "tests/documents.test.js": "f9aaef1ca0a1b6ce5f5d932202c67da822c90c55af1a67623f349b439f79de99",
+    "tests/drafts.test.js": "d2acc84e28686018a2edda76f28e0167f219dfa031478b2472ed04b0c6e7e74f",
+    "tests/engine.test.js": "3c48e2b297af0fc665f9defdfd348174f7b813741733d931f6681616d259bf9e",
+    "tests/examples.test.js": "3510fcf4890f98946ab476159abe2147b4c2c400cecf334b3bdbccf23754fdf0",
+    "tests/hashbin.test.js": "75b54e08d2830ec5429c7217706c8187bbfa9fafd486e797dfd9009721ead8d7",
+    "tests/offline.test.js": "49dab6822d4d7cdd4c814253db8e59ae857c5b7dac6126fe7226a09dc8603a39",
+    "tests/sandbox.test.js": "6a36415ada07d6cb6ca2f07df4d419467bed38639ee92fbc589be0698ba0fb60"
+  },
+  "storage": [
+    {
+      "file": "src/app.js",
+      "key": "gnuplotonline:document"
+    },
+    {
+      "file": "src/domain-migration.js",
+      "key": "pythononline:persistent-home"
+    },
+    {
+      "file": "tests/browser/all.cjs",
+      "key": "gnuplotonline:document"
+    },
+    {
+      "file": "tests/browser/all.cjs",
+      "key": "gnuplotonline:document"
+    },
+    {
+      "file": "tests/browser/all.cjs",
+      "key": "test:publish"
+    },
+    {
+      "file": "tests/browser/all.cjs",
+      "key": "test:state"
+    },
+    {
+      "file": "tests/browser/all.cjs",
+      "key": "test:state"
+    },
+    {
+      "file": "tests/browser/all.cjs",
+      "key": "hashbin:tokens:test-client"
+    },
+    {
+      "file": "tests/browser/all.cjs",
+      "key": "test:revoked"
+    },
+    {
+      "file": "tests/browser/all.cjs",
+      "key": "test:seeded"
+    },
+    {
+      "file": "tests/browser/all.cjs",
+      "key": "test:seeded"
+    },
+    {
+      "file": "tests/browser/all.cjs",
+      "key": "hashbin:tokens:test-client"
+    },
+    {
+      "file": "tests/browser/all.cjs",
+      "key": "test:revoked"
+    },
+    {
+      "file": "tests/browser/all.cjs",
+      "key": "hashbin:tokens:test-client"
+    },
+    {
+      "file": "tests/browser/all.cjs",
+      "key": "test:publish"
+    },
+    {
+      "file": "tests/browser/all.cjs",
+      "key": "test:publish"
+    },
+    {
+      "file": "tests/browser/all.cjs",
+      "key": "test:publish"
+    },
+    {
+      "file": "tests/drafts.test.js",
+      "key": "work"
+    },
+    {
+      "file": "tests/drafts.test.js",
+      "key": "work"
+    },
+    {
+      "file": "tests/drafts.test.js",
+      "key": "work"
+    },
+    {
+      "file": "tests/drafts.test.js",
+      "key": "work"
+    }
+  ],
+  "caches": [],
+  "references": [
+    {
+      "file": "README.md",
+      "href": "https://curtcox.github.io/GnuplotOnline/gallery.html)"
+    },
+    {
+      "file": "src/domain-migration.js",
+      "href": "https://hashbin.org/docs/textpad/app"
+    },
+    {
+      "file": "tests/documents.test.js",
+      "href": "https://example.org/GnuplotOnline/?example=x#stale"
+    },
+    {
+      "file": "tests/documents.test.js",
+      "href": "https://x/?example=wave"
+    },
+    {
+      "file": "tests/documents.test.js",
+      "href": "https://x/?doc=stale&w=4&code=bad#x"
+    },
+    {
+      "file": "tests/documents.test.js",
+      "href": "https://example.org/?compressed=x"
+    }
+  ],
+  "cases": [
+    {
+      "label": "source fragment",
+      "href": "https://curtcox.github.io/GnuPlotOnline/#%23%20A%20function%20and%20a%20few%20observations%0Aset%20title%20%22A%20little%20signal%2C%20a%20little%20noise%22%20font%20%22%2C18%22%0Aset%20xlabel%20%22Time%20(s)%22%0Aset%20ylabel%20%22Amplitude%22%0Aset%20grid%20back%20lc%20rgb%20%22%23e2eaed%22%0Aset%20border%203%20lc%20rgb%20%22%23718994%22%0Aset%20tics%20nomirror%0Aset%20key%20top%20right%0Aset%20xrange%20%5B0%3A10%5D%0Af(x)%20%3D%20sin(x)%20*%20exp(-x%2F8)%0A%24observations%20%3C%3C%20EOD%0A0.5%200.52%0A1.5%200.77%0A2.5%200.49%0A3.5%20-0.18%0A4.5%20-0.55%0A5.5%20-0.39%0A6.5%200.16%0A7.5%200.42%0A8.5%200.31%0A9.5%20-0.08%0AEOD%0Aplot%20f(x)%20title%20%22Damped%20wave%22%20with%20lines%20lw%203%20lc%20rgb%20%22%23087e8b%22%2C%20%5C%0A%20%20%20%20%20%24observations%20title%20%22Observations%22%20with%20points%20pt%207%20ps%201.2%20lc%20rgb%20%22%23e49c46%22",
+      "kind": "source",
+      "src": "# A function and a few observations\nset title \"A little signal, a little noise\" font \",18\"\nset xlabel \"Time (s)\"\nset ylabel \"Amplitude\"\nset grid back lc rgb \"#e2eaed\"\nset border 3 lc rgb \"#718994\"\nset tics nomirror\nset key top right\nset xrange [0:10]\nf(x) = sin(x) * exp(-x/8)\n$observations << EOD\n0.5 0.52\n1.5 0.77\n2.5 0.49\n3.5 -0.18\n4.5 -0.55\n5.5 -0.39\n6.5 0.16\n7.5 0.42\n8.5 0.31\n9.5 -0.08\nEOD\nplot f(x) title \"Damped wave\" with lines lw 3 lc rgb \"#087e8b\", \\\n     $observations title \"Observations\" with points pt 7 ps 1.2 lc rgb \"#e49c46\""
+    },
+    {
+      "label": "compressed query",
+      "href": "https://curtcox.github.io/GnuPlotOnline/?compressed=MQAggiBmCuB2DGAXAlge1iAhrAJlqApgO4ioBGAzgQE4BumK6FAUFYiCogDYEgBEELskTdeFZAHNYmLgBp8QkTxCxUyKnyjp2fWQEYAHH1YF2ADy6YyBLvwAqyALa8AFBQCUxtiACel67YCjgAOitA4BF6mIBLUyHhkmPAA1iBc8CDUEmT8wAQATASYBDhR7GSo1BHUIADMaRlZOXzAAOyGAJwdACxlHMjwFCqojsjU1JUm7MkEPhyowZmSABaIUyBm1NgSvADaAAwAXHr7ALrMkC5m7iAAvCDisFc3AFQgBGbBLgC0ZgD0BnczAAJOQqHQGGhYEMADwwkAAUQA8gARZj7AB0AFYQJisflmHpsbiMa1Wsx8sTMd0OsxasTvpjDMxugy8VjmFi2RjarSAGxUjF6PnMVqC7oEgyC2p6Zgdbn7AzMZFo0KodiXa79UT8FGYEIlEBETC0SJG4TLNLIWAEIZcEj1dKZbK5RWtAgGMi6EAAHWYIADAdBlBo9EY0O1yj4SJDEPDFE0RAtIGCalgiCGwXYrRTQyJ+QazuaeRp8G6fL4QA",
+      "kind": "source",
+      "src": "# A function and a few observations\nset title \"A little signal, a little noise\" font \",18\"\nset xlabel \"Time (s)\"\nset ylabel \"Amplitude\"\nset grid back lc rgb \"#e2eaed\"\nset border 3 lc rgb \"#718994\"\nset tics nomirror\nset key top right\nset xrange [0:10]\nf(x) = sin(x) * exp(-x/8)\n$observations << EOD\n0.5 0.52\n1.5 0.77\n2.5 0.49\n3.5 -0.18\n4.5 -0.55\n5.5 -0.39\n6.5 0.16\n7.5 0.42\n8.5 0.31\n9.5 -0.08\nEOD\nplot f(x) title \"Damped wave\" with lines lw 3 lc rgb \"#087e8b\", \\\n     $observations title \"Observations\" with points pt 7 ps 1.2 lc rgb \"#e49c46\""
+    },
+    {
+      "label": "document query",
+      "href": "https://curtcox.github.io/GnuPlotOnline/?doc=N4IgZg9gTgtghgFxALhACzgZzQIwJYB2AtACZ5wDmUcMIANCAG4CmUmeEBKAjAwgJ4AHZihAUCAV0EAbCEgaYoAY1EBiAAQBBdWAkElCDgXVwCJEzuYB3dRByZWjREcwAdAg4TrDCac3WuINrSeAi+-uzicNJ0FiFhfuoEEHgOgTqcXoF03AAcge6e6gAe0nA4zNIBIAAqeDD+ABSYAJQFHsxe-GUVVYGaMDKhEiTM7UVUeOY4cEoA1urSSupQFDjVqswATMxwzCTjneo40KNQ6gDMi8ur64GqAOx5AJzPACyHXoZKmEkQMHgoFBoIUjnNmPxvBBBCs8BQ0AhQV5itQCBR-ABtAAMyG4WIAuu4wI1ii11ABedTsAgkskAKnUzGKgkaRGKAHpcm0CAASOwOKBOQycX4AHlF6gAogB5AAi7ixADoAKzqJXKrbubgqtWKh4PdxbHVKt7PdwXHVEJV5dxvS3q5XuZX2xUXM0EABsxsV3A97ge3remoIuW9F247meLqx+QIMvlBBkch0tO8oUSgVlNGE5iscBY6SsoTQi0IzF+0hsVyWKzWGxjD2YuRw2QCrnc6k7nb59kczhFafC1WlvcF-Y8heL6kEKQICF+gi8D2nv21W2utbuIE2pqUbz9IHoYkkSaQyFARZICDQKA9byxDDQzDhCJQb1yD5AM3mVAgehIogIKimCCHAUDMHOIAAL4MGAeB+JgKCgE40gSOWiokIgojcOowbrhc0FQUAA",
+      "kind": "source",
+      "raw": "{\"format\":\"hashbin-diagram\",\"version\":1,\"type\":\"gnuplot\",\"src\":\"# A function and a few observations\\nset title \\\"A little signal, a little noise\\\" font \\\",18\\\"\\nset xlabel \\\"Time (s)\\\"\\nset ylabel \\\"Amplitude\\\"\\nset grid back lc rgb \\\"#e2eaed\\\"\\nset border 3 lc rgb \\\"#718994\\\"\\nset tics nomirror\\nset key top right\\nset xrange [0:10]\\nf(x) = sin(x) * exp(-x/8)\\n$observations << EOD\\n0.5 0.52\\n1.5 0.77\\n2.5 0.49\\n3.5 -0.18\\n4.5 -0.55\\n5.5 -0.39\\n6.5 0.16\\n7.5 0.42\\n8.5 0.31\\n9.5 -0.08\\nEOD\\nplot f(x) title \\\"Damped wave\\\" with lines lw 3 lc rgb \\\"#087e8b\\\", \\\\\\n     $observations title \\\"Observations\\\" with points pt 7 ps 1.2 lc rgb \\\"#e49c46\\\"\",\"gnuplot\":{\"width\":640,\"height\":480,\"background\":\"transparent\"},\"files\":{\"values.dat\":\"1 2\\n2 3\"}}"
+    },
+    {
+      "label": "document fragment",
+      "href": "https://curtcox.github.io/GnuPlotOnline/#%7B%22format%22%3A%22hashbin-diagram%22%2C%22version%22%3A1%2C%22type%22%3A%22gnuplot%22%2C%22src%22%3A%22%23%20A%20function%20and%20a%20few%20observations%5Cnset%20title%20%5C%22A%20little%20signal%2C%20a%20little%20noise%5C%22%20font%20%5C%22%2C18%5C%22%5Cnset%20xlabel%20%5C%22Time%20(s)%5C%22%5Cnset%20ylabel%20%5C%22Amplitude%5C%22%5Cnset%20grid%20back%20lc%20rgb%20%5C%22%23e2eaed%5C%22%5Cnset%20border%203%20lc%20rgb%20%5C%22%23718994%5C%22%5Cnset%20tics%20nomirror%5Cnset%20key%20top%20right%5Cnset%20xrange%20%5B0%3A10%5D%5Cnf(x)%20%3D%20sin(x)%20*%20exp(-x%2F8)%5Cn%24observations%20%3C%3C%20EOD%5Cn0.5%200.52%5Cn1.5%200.77%5Cn2.5%200.49%5Cn3.5%20-0.18%5Cn4.5%20-0.55%5Cn5.5%20-0.39%5Cn6.5%200.16%5Cn7.5%200.42%5Cn8.5%200.31%5Cn9.5%20-0.08%5CnEOD%5Cnplot%20f(x)%20title%20%5C%22Damped%20wave%5C%22%20with%20lines%20lw%203%20lc%20rgb%20%5C%22%23087e8b%5C%22%2C%20%5C%5C%5Cn%20%20%20%20%20%24observations%20title%20%5C%22Observations%5C%22%20with%20points%20pt%207%20ps%201.2%20lc%20rgb%20%5C%22%23e49c46%5C%22%22%2C%22gnuplot%22%3A%7B%22width%22%3A640%2C%22height%22%3A480%2C%22background%22%3A%22transparent%22%7D%2C%22files%22%3A%7B%22values.dat%22%3A%221%202%5Cn2%203%22%7D%7D",
+      "kind": "source",
+      "raw": "{\"format\":\"hashbin-diagram\",\"version\":1,\"type\":\"gnuplot\",\"src\":\"# A function and a few observations\\nset title \\\"A little signal, a little noise\\\" font \\\",18\\\"\\nset xlabel \\\"Time (s)\\\"\\nset ylabel \\\"Amplitude\\\"\\nset grid back lc rgb \\\"#e2eaed\\\"\\nset border 3 lc rgb \\\"#718994\\\"\\nset tics nomirror\\nset key top right\\nset xrange [0:10]\\nf(x) = sin(x) * exp(-x/8)\\n$observations << EOD\\n0.5 0.52\\n1.5 0.77\\n2.5 0.49\\n3.5 -0.18\\n4.5 -0.55\\n5.5 -0.39\\n6.5 0.16\\n7.5 0.42\\n8.5 0.31\\n9.5 -0.08\\nEOD\\nplot f(x) title \\\"Damped wave\\\" with lines lw 3 lc rgb \\\"#087e8b\\\", \\\\\\n     $observations title \\\"Observations\\\" with points pt 7 ps 1.2 lc rgb \\\"#e49c46\\\"\",\"gnuplot\":{\"width\":640,\"height\":480,\"background\":\"transparent\"},\"files\":{\"values.dat\":\"1 2\\n2 3\"}}"
+    },
+    {
+      "label": "example",
+      "href": "https://curtcox.github.io/GnuPlotOnline/?example=damped-wave",
+      "kind": "example",
+      "id": "damped-wave"
+    },
+    {
+      "label": "CID",
+      "href": "https://curtcox.github.io/GnuPlotOnline/#AAAAAAIejnOKjMLC-uu8oUtrCVtL_8GdDTx7cjQvuR1ZpsqTmfbei-TdF_6C5hzjO8IgBnoiK0HZ0cnoffdwaZjVc8odeA",
+      "kind": "cid",
+      "cid": "AAAAAAIejnOKjMLC-uu8oUtrCVtL_8GdDTx7cjQvuR1ZpsqTmfbei-TdF_6C5hzjO8IgBnoiK0HZ0cnoffdwaZjVc8odeA"
+    }
+  ]
+}

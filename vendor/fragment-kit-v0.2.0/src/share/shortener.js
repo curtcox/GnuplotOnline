@@ -1,51 +1,4 @@
-(() => {
-/** Links capture one editor version; shortening is optional and bounded. */
-const HashBinDocuments = typeof module !== 'undefined' ? require('./hashbin.js').HashBinDocuments : globalThis.HashBinDocuments;
-const ShareLinks = {
-  build({ url, code, src = code, files = {}, gnuplot = {}, compress }) {
-    const link = new URL(url);
-    link.search = ''; link.hash = '';
-    const hasOptions = (gnuplot.width && gnuplot.width !== 800) || (gnuplot.height && gnuplot.height !== 600) || gnuplot.background === 'transparent';
-    const document = Object.keys(files).length || hasOptions;
-    const payload = document ? HashBinDocuments.serialize({ src, files, gnuplot }) : src;
-    link.hash = encodeURIComponent(src);
-    if (document) {
-      if (Object.keys(files).length) {
-        // The plain fallback also contains the entire document; no data is silently lost.
-        link.hash = ''; link.searchParams.set('doc', compress(payload));
-      } else {
-        link.searchParams.set('w', gnuplot.width || 800); link.searchParams.set('h', gnuplot.height || 600);
-        link.searchParams.set('bg', gnuplot.background || 'white');
-      }
-    }
-    const long = link.href;
-    try {
-      const compressed = compress?.(payload);
-      if (compressed) { link.search = ''; link.hash = ''; link.searchParams.set(document ? 'doc' : 'compressed', compressed); }
-    } catch (_) { /* Plain source remains usable. */ }
-    return Object.freeze({ long, fallback: link.href });
-  },
-  parse(url, decompress) {
-    const link = new URL(url), params = link.searchParams;
-    if (params.has('doc')) {
-      const payload = decompress(params.get('doc'));
-      if (!payload) throw new Error('The shared document could not be decompressed.');
-      return { kind: 'source', ...HashBinDocuments.parse(payload) };
-    }
-    if (params.has('compressed')) {
-      const src = decompress(params.get('compressed'));
-      if (src === null) throw new Error('The shared source could not be decompressed.');
-      return { kind: 'source', src, files: {}, gnuplot: { width: params.get('w') || 800, height: params.get('h') || 600, background: params.get('bg') || 'white' } };
-    }
-    const hash = link.hash.slice(1);
-    if (new URLSearchParams(hash).has('hashbin_publish')) return { kind: 'publish' };
-    if (HashBinDocuments.isCID(hash)) return { kind: 'cid', cid: hash };
-    if (hash) return { kind: 'source', src: decodeURIComponent(hash), files: {}, gnuplot: { width: params.get('w') || 800, height: params.get('h') || 600, background: params.get('bg') || 'white' } };
-    if (params.has('example')) return { kind: 'example', id: params.get('example') };
-    return null;
-  }
-};
-
+// Extracted without changing messages; see vendor/LICENSE-graphvizonline.
 class ShareError extends Error {
   constructor(code, message) { super(message); this.code = code; }
 }
@@ -150,7 +103,5 @@ class ShareClient {
     return new ShareError('http', `${service} returned ${code}. ${guidance}`);
   }
 }
-if (typeof module !== 'undefined') module.exports = { ShareLinks, ShareClient };
-else Object.assign(globalThis, { ShareLinks, ShareClient });
 
-})();
+export { ShareError, ShareClient };

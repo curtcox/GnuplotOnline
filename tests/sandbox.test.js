@@ -6,7 +6,7 @@ const Sandbox = require('../src/gnuplot-sandbox.js');
 const base = 'https://gnuplot.hashbin.page/src/';
 const tick = () => new Promise(resolve => setImmediate(resolve));
 test('plotting SDK matches the published v0.4.0 release', () => {
-  const hash = createHash('sha256').update(fs.readFileSync('vendor/hashbin-sdk-v0.4.0.mjs')).digest('hex');
+  const hash = createHash('sha256').update(fs.readFileSync('vendor/fragment-kit-v0.2.0/vendor/hashbin-sdk-v0.4.0.mjs')).digest('hex');
   assert.equal(hash, '82f25ffe41a0ff79a060fb593754a286e1c85c2502878ab387c3d0045b749fa5');
 });
 test('sandbox queues runs, proxies only the runtime and removes the frame on cancellation', async () => {

@@ -5,4 +5,6 @@ for (const dir of ['src','scripts','tests','tests/browser']) for (const file of 
   const result = spawnSync(process.execPath,['--check',dir+'/'+file],{stdio:'inherit'}); if(result.status) process.exit(result.status);
 }
 for (const file of ['offline-assets.js','service-worker.js']) { const result=spawnSync(process.execPath,['--check',file],{stdio:'inherit'});if(result.status)process.exit(result.status); }
-const result=spawnSync(process.execPath,['scripts/update-offline.mjs','--check'],{stdio:'inherit'});process.exit(result.status);
+const result=spawnSync(process.execPath,['scripts/update-offline.mjs','--check'],{stdio:'inherit'});if(result.status)process.exit(result.status);
+
+const kit=spawnSync(process.execPath,['vendor/fragment-kit-v0.2.0/tools/check.mjs','--config','fragment-kit.config.json'],{stdio:'inherit'});process.exit(kit.status);

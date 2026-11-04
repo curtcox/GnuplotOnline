@@ -1,3 +1,10 @@
+import { LocalDrafts, RenderScheduler, HashBinPanel, ShareClient, createShell, mountMobileTabs,
+  createQrDialog, createShareDialog } from '../vendor/fragment-kit-v0.2.0/src/index.js';
+import { config, type, urlState, HashBinDocuments, HashBinStore, compress, decompress } from './fragment-config.mjs';
+// Keep legacy test/document entry points during this migration; production uses imports.
+import * as Kit from '../vendor/fragment-kit-v0.2.0/src/index.js';
+Object.assign(globalThis, { HashBinDocuments: { ...HashBinDocuments, ...Object.fromEntries(['isCID','cidLength','bytes','encode64','decode64','verify'].map(key => [key, Kit[key]])) },
+  LZString: { compressToEncodedURIComponent: compress, decompressFromEncodedURIComponent: decompress } });
 /* Browser glue. The engine, documents and exports stay independent of the UI. */
 (async () => {
   'use strict';
@@ -10,10 +17,10 @@
     callback(null, 'plot splot set unset reset fit stats do for while if else print pause replot title xlabel ylabel xrange yrange zrange grid key terminal output samples isosamples multiplot polar parametric palette pm3d using with lines points linespoints boxes histograms yerrorbars filledcurves vectors image sin cos exp log sqrt'.split(' ').map(value => ({ caption: value, value, meta: 'gnuplot', score: 800 })));
   } });
   let files = new DataFiles(), settings = GnuplotCore.options(), revision = 0, applying = false, result = null, pan = null;
-  let saved = null, persistTimer, editingName = null;
+  let saved = null, persistTimer, editingName = null, pendingQrSave = false, autorun = true;
   const snapshot = () => ({ src: editor.getValue(), gnuplot: { width: settings.width, height: settings.height, background: settings.background }, files: files.snapshot() });
   const fingerprint = () => JSON.stringify(snapshot());
-  const links = () => ShareLinks.build({ url: location.href, ...snapshot(), compress: LZString.compressToEncodedURIComponent });
+  const links = () => urlState.build(snapshot());
   const currentLink = () => saved?.fingerprint === fingerprint() ? saved.link : links().fallback;
   const safeStorage = name => { try { return window[name]; } catch (_) { return undefined; } };
   const local = safeStorage('localStorage');
@@ -83,15 +90,15 @@
   function persist(edit = false) { drafts.attempt(snapshot(), edit === true); }
   function refreshShare({ address = false } = {}) {
     try {
-      const url = currentLink(); $('share-url').value = url;
-      if (address) history.replaceState(null, '', url);
-      refreshQr();
-    } catch (error) { $('share-status').textContent = error.message; }
+      const url = currentLink();
+      if (address) { urlState.cancel(); history.replaceState(null, '', url); }
+      if (qr.dialog.open) qr.setLink(url);
+    } catch (error) { $('status').textContent = error.message; }
   }
   function changed() {
     if (applying) return;
-    revision++; client.cancel(); hashbin.cancelLoad(); shareClient.cancel(); saved = null; persist(true);
-    $('share-status').textContent = ''; $('cancel').hidden = true; $('status').textContent = 'Waiting for edits…';
+    revision++; client.cancel(); hashbin.cancelLoad(); urlState.cancel(); shareClient.cancel(); saved = null; persist(true);
+     $('cancel').hidden = true; $('status').textContent = 'Waiting for edits…';
     clearTimeout(persistTimer);
     persistTimer = setTimeout(() => { persist(); refreshShare({ address: true }); }, 180);
     scheduler.schedule({ detect: false });
@@ -104,7 +111,7 @@
     $('custom-size').hidden = $('size').value !== 'custom';
   }
   function apply(doc, { run = true } = {}) {
-    clearTimeout(persistTimer); drafts.opened();
+    clearTimeout(persistTimer); urlState.cancel(); shareClient.cancel(); drafts.opened();
     const nextFiles = new DataFiles(doc.files || {}); DataFiles.validate(nextFiles.files, doc.src);
     applying = true;
     try { files = nextFiles; settings = GnuplotCore.options(doc.gnuplot); editor.setValue(doc.src, -1); editor.session.setUndoManager(new ace.UndoManager()); syncOptions(); }
@@ -113,13 +120,38 @@
     $('file-count').textContent = Object.keys(files.files).length; listFiles(); if (run) render();
   }
   const shareClient = new ShareClient();
-  const redirect = new URL('./', location.href); redirect.search = ''; redirect.hash = '';
-  const store = new HashBinStore({ clientId: document.querySelector('meta[name="hashbin-client-id"]').content.trim(),
-    redirectUri: redirect.href, storage: local, transactionStorage: safeStorage('sessionStorage') });
-  const hashbin = new HashBinPanel({ store, getSnapshot: snapshot, getFingerprint: fingerprint,
-    onLoad: (doc, cid) => { apply(doc); const link = HashBinDocuments.link(location.href, cid); saved = { fingerprint: fingerprint(), link }; history.replaceState(null, '', link); refreshShare(); },
-    onSaved: (_cid, value, link) => { saved = { fingerprint: value, link }; history.replaceState(null, '', link); refreshShare(); } });
+  const oldHeader = document.querySelector('header');
+  const brand = oldHeader.querySelector('.brand'); oldHeader.remove();
+  const shell = createShell({ config });
+  shell.header.querySelector('.fk-brand').replaceChildren(...brand.childNodes);
+  shell.toolbar.remove(); shell.status.remove();
+  shell.header.querySelector('.fk-more').id = 'more';
+  document.querySelector('.mobile-tabs').remove(); document.querySelector('.toolbar > #more').remove();
+  for (const id of ['share','qr-open']) document.querySelector('.toolbar').insertBefore($(id), $('extra-tools'));
+  const extra = $('extra-tools'); shell.drawer.body.append(extra); extra.classList.add('kit-tools');
+  for (const id of ['hashbin-save','hashbin-load','hashbin-cid','hashbin-status','hashbin-dialog','qr-dialog']) $(id).remove();
+  const store = new HashBinStore({ legacyStorage: local });
+  const hashbin = new HashBinPanel({ store, urlState, container: extra, getSnapshot: snapshot, getFingerprint: fingerprint,
+    onLoad: (doc, cid) => { apply(doc, {run:autorun}); const link = cid ? urlState.link(location.href, cid) : links().href; saved = cid ? { fingerprint: fingerprint(), link } : null; history.replaceState(null, '', link); refreshShare(); },
+    onSaved: (_cid, value, link) => {
+      clearTimeout(persistTimer); urlState.cancel(); saved = { fingerprint: value, link }; history.replaceState(null, '', link); refreshShare();
+      if (pendingQrSave) { pendingQrSave = false; hashbin.dialog.close(); qr.open(link); }
+    } });
+  const openSave = () => hashbin.openSave();
+  hashbin.saveButton.onclick = openSave;
+  const shareDialog = createShareDialog({ urlState, getSnapshot: snapshot, onSave: openSave });
+  const qr = createQrDialog({ config, urlState, onLoad: async outcome => {
+    shell.drawer.dialog.close();
+    if (outcome.kind === 'cid') await hashbin.load(outcome.cid);
+    else { const parsed = outcome.intent; autorun = parsed.run; if (parsed.kind === 'source') { hashbin.cancelLoad(); apply(parsed.doc, { run: parsed.run }); refreshShare({ address: true }); }
+      else if (parsed.kind === 'cid') await hashbin.load(parsed.cid);
+      else if (parsed.kind === 'example') { const sample = GnuplotExamples.catalog.find(item => item.id === parsed.id); if (!sample) throw new Error('Unknown example.'); hashbin.cancelLoad(); apply({ src: sample.source, files: sample.files || {} }, { run: parsed.run }); refreshShare({ address: true }); }
+    }
+  }, onSave: () => { pendingQrSave = true; qr.dialog.close(); openSave(); } });
+  // Closing the snapshot approval also cancels the pending QR handoff.
+  hashbin.dialog.addEventListener('close', () => { pendingQrSave = false; });
   editor.session.on('change', changed);
+  $('render').onclick = () => { scheduler.cancel(); render(); };
   $('cancel').onclick = () => { revision++; scheduler.cancel(); client.cancel(); $('cancel').hidden = true; $('status').textContent = 'Cancelled'; };
   $('size').onchange = () => {
     $('custom-size').hidden = $('size').value !== 'custom';
@@ -142,8 +174,11 @@
   function setSplit(value) { const width = Math.max(20, Math.min(75, value)); $('editor-pane').style.width = width + '%'; $('splitter').setAttribute('aria-valuenow', Math.round(width)); resize(); }
   $('splitter').onkeydown = event => { if (['ArrowLeft', 'ArrowRight'].includes(event.key)) { event.preventDefault(); setSplit(parseFloat($('splitter').getAttribute('aria-valuenow')) + (event.key === 'ArrowLeft' ? -2 : 2)); } };
   window.addEventListener('resize', resize);
-  for (const tab of ['preview', 'code']) $('tab-' + tab).onclick = () => { document.body.dataset.tab = tab; for (const name of ['preview', 'code']) $('tab-' + name).setAttribute('aria-selected', name === tab); resize(); if (tab === 'code') editor.focus(); };
-  $('more').onclick = () => { const open = document.body.classList.toggle('more-open'); $('more').setAttribute('aria-expanded', open); resize(); };
+  const tabs = mountMobileTabs({ panels: [{ label: 'Code', panel: $('editor-pane') }, { label: 'Preview', panel: $('preview-pane') }],
+    container: document.querySelector('.toolbar'), onChange: index => { document.body.dataset.tab = index ? 'preview' : 'code'; resize(); } });
+  tabs.select(1);
+  const tabButtons = document.querySelectorAll('.fk-tabs button'); tabButtons[0].id = 'tab-code'; tabButtons[1].id = 'tab-preview';
+  $('editor-pane').setAttribute('aria-labelledby', 'tab-code'); $('preview-pane').setAttribute('aria-labelledby', 'tab-preview');
   $('fit').onclick = () => { pan?.resize(); pan?.fit(); pan?.center(); };
   $('actual').onclick = () => { if (pan) { pan.zoom(pan.getZoom() / pan.getSizes().realZoom); pan.center(); } };
   $('zoom-in').onclick = () => pan?.zoomIn(); $('zoom-out').onclick = () => pan?.zoomOut();
@@ -183,24 +218,8 @@
     } catch (error) { setError(error.message); }
   }
   $('download').onclick = download;
-  $('share').onclick = async () => { refreshShare({ address: true }); $('share-url').select(); try { await navigator.clipboard.writeText($('share-url').value); $('share-status').textContent = 'Link copied.'; } catch (_) { $('share-status').textContent = 'Select and copy the link above.'; } };
-  $('share-url').onclick = () => $('share-url').select();
-  $('shorten').onclick = async () => {
-    const ownRevision = revision; $('share-status').textContent = 'Shortening…'; refreshShare();
-    const response = await shareClient.shorten(saved ? { long: currentLink(), fallback: currentLink() } : links());
-    if (ownRevision !== revision || !response) return;
-    $('share-url').value = response.url; $('share-status').textContent = response.error?.message || 'Short link ready to copy.';
-  };
-  let qrMarkup = '';
-  function refreshQr() {
-    if (!$('qr-dialog').open) return;
-    const url = currentLink(), qr = encodeQr(url); qrMarkup = qr ? qrSvg(qr) : '';
-    $('qr-code').innerHTML = qrMarkup; $('qr-message').textContent = qrNotes(url, qr); $('qr-url').textContent = url;
-    $('qr-svg').disabled = $('qr-png').disabled = !qr;
-  }
-  $('qr-open').onclick = () => { $('qr-dialog').showModal(); refreshQr(); };
-  $('qr-svg').onclick = () => PlotExport.download(qrMarkup, 'plot-qr.svg', 'image/svg+xml');
-  $('qr-png').onclick = async () => { try { PlotExport.download(await PlotExport.png(qrMarkup, 1), 'plot-qr.png'); } catch (error) { $('qr-message').textContent = error.message; } };
+  $('share').onclick = () => { shell.drawer.dialog.close(); refreshShare({ address: true }); shareDialog.open(); };
+  $('qr-open').onclick = () => { shell.drawer.dialog.close(); qr.open(currentLink()); };
   document.querySelectorAll('[data-close]').forEach(button => button.onclick = () => $(button.dataset.close).close());
   function listFiles() {
     $('file-list').replaceChildren();
@@ -242,33 +261,35 @@
     hashbin.cancelLoad();
     try {
       clearTimeout(persistTimer); scheduler.cancel(); client.cancel(); revision++; saved = null;
-      drafts.opened(); applying = true; editor.setValue('', -1); applying = false;
-      pan?.destroy(); pan = null; result = null; $('preview').replaceChildren(); $('output').textContent = '';
+      drafts.opened();
       if (initial) store.retireLegacyTokens().catch(() => {});
       const loadRevision = revision;
-      const parsed = ShareLinks.parse(location.href, LZString.decompressFromEncodedURIComponent);
+      const parsed = urlState.parse(location.href); autorun = parsed.run;
       if (parsed?.kind === 'publish') {
         const published = await store.published(location.hash);
         // Edits made while the return was verified win over it.
         const current = loadRevision === revision;
-        if (published.snapshot && current) apply(published.snapshot);
-        if (published.cid && current) saved = { fingerprint: fingerprint(), link: HashBinDocuments.link(location.href, published.cid) };
+        if (published?.snapshot && current) apply(published.snapshot);
+        if (published?.cid && current) saved = { fingerprint: fingerprint(), link: HashBinDocuments.link(location.href, published.cid) };
         if (saved) history.replaceState(null, '', saved.link); else refreshShare({ address: true });
-        $('hashbin-status').textContent = published.error || 'Saved to HashBin.';
-      } else if (parsed?.kind === 'source') apply(parsed);
+        $('hashbin-status').textContent = published?.error || 'Saved to HashBin.';
+      } else if (parsed.kind === 'source') apply(parsed.doc, { run: parsed.run });
       else if (parsed?.kind === 'example') {
         const sample = GnuplotExamples.catalog.find(item => item.id === parsed.id);
         if (!sample) throw new Error('Unknown example. Choose a sample from the gallery.');
         const doc = { src: sample.source, files: sample.files || {} };
-        apply(doc);
+        apply(doc, { run: parsed.run }); refreshShare({ address: true });
       } else if (parsed?.kind === 'cid') {
         await hashbin.load(parsed.cid);
         return;
       }
-      if (!parsed) { const params = new URL(location.href).searchParams; apply({ src: GnuplotExamples.defaultSource, gnuplot: { width: params.get('w') || 800, height: params.get('h') || 600, background: params.get('bg') } }); }
+      if (parsed.kind === 'none') { const params = new URL(location.href).searchParams; apply({ src: GnuplotExamples.defaultSource, gnuplot: { width: params.get('w') || 800, height: params.get('h') || 600, background: params.get('bg') } }, {run:parsed.run}); }
       refreshShare();
-    } catch (error) { setError(error.message); }
+    } catch (error) { setError(error.message); $('status').textContent = error.message; }
+    finally { document.body.dataset.ready = 'true'; }
   }
-  window.addEventListener('hashchange', () => loadUrl());
+  let lastNavigation = location.href;
+  const navigate = () => { if (location.href === lastNavigation) return; lastNavigation = location.href; void loadUrl(); };
+  window.addEventListener('hashchange', navigate); window.addEventListener('popstate', navigate);
   await loadUrl({ initial: true });
 })();
