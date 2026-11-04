@@ -18,3 +18,5 @@ and the 360px layout. The reusable Pages workflow verifies the deployment marker
 A hosting follow-up pins v0.3.1 for its CommonJS-readable generated manifest,
 regenerates the HashBin-owned notice before hashing, ignores late navigation
 events for consumed callbacks and exposes failed CID loads in the main status.
+
+In-flight Publish returns from before the migration remain readable only for this registered public client. New transactions are app-prefixed, and consuming a callback removes its legacy transaction. Other clients and credential keys are excluded. Workflows now use the tested immutable `v2` reference while the runtime stays exactly v0.3.1.

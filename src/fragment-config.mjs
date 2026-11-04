@@ -1,6 +1,6 @@
 import * as Core from './gnuplot-core.js';
 import * as Files from './data-files.js';
-import { createConfig, createUrlState, HashBinStore as Store, compress, decompress } from '../vendor/fragment-kit-v0.3.1/src/index.js';
+import { createConfig, createUrlState, HashBinStore as Store, createStorage, compress, decompress } from '../vendor/fragment-kit-v0.3.1/src/index.js';
 const GnuplotCore = Core.default ?? globalThis.GnuplotCore;
 const DataFiles = Files.default ?? globalThis.DataFiles;
 import appConfig from '../fragment-kit.config.json' with { type: 'json' };
@@ -36,5 +36,10 @@ export const urlState = createUrlState({ config, type, legacyWriter, legacyReade
 }] });
 export const HashBinDocuments = { ...urlState.documents, MAX_BYTES: config.maxBytes, link: urlState.link };
 // Node tests and existing URL fixtures use the same production adapter.
-export class HashBinStore extends Store { constructor(options = {}) { super({ config, type, ...options }); } }
+export function publishTransactions(storage,clientId=config.hashbinClientId){
+ if(!storage)return undefined;
+ const current=createStorage({prefix:config.storagePrefix,storage}),owned=key=>key.startsWith('hashbin:publish:'+clientId+':');
+ return {getItem(key){const value=current.getItem(key);if(value!=null||!owned(key))return value;try{return storage.getItem(key);}catch{return null;}},setItem:(key,value)=>current.setItem(key,value),removeItem(key){current.removeItem(key);if(owned(key))try{storage.removeItem(key);}catch{}}};
+}
+export class HashBinStore extends Store { constructor(options = {}) { let storage;try{storage=globalThis.sessionStorage;}catch{}super({ config, type,transactionStorage:publishTransactions(storage,options.clientId??config.hashbinClientId), ...options }); } }
 export { compress, decompress };

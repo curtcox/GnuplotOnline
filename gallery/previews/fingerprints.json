@@ -5,7 +5,7 @@
     "src/gnuplot-sandbox.js": "d13f1e018d634fa39a371ee55291b0d24e96d0da86c1f6ffb48bb17707e3f5b5",
     "src/app.js": "7a00fb245dab1fd63aa088717f77a62f1c7c6c43d7ab38ddb6498afcbaa976ec",
     "src/app.css": "baece7e8c7d1abbdb65bb2f768f0eb8cf241fe668b97e9ae5b4947c1b1255806",
-    "src/fragment-config.mjs": "15d5568b272372c5c94ae1978191245b3601422d28cc43fffa0a1183f545d4f1",
+    "src/fragment-config.mjs": "8753064edeee6d30f42b0cd41e87334f2c4c76a9ccd6436a89ebbb535d2ac27b",
     "src/examples.js": "d87eb3d4dcdaf7eea49e505d218e230ccad835d2c91496a9188c2bb977823a62",
     "src/gnuplot-core.js": "8460e8e5b7eec0666dfc44139139a17ecf00d027eded30b1b16a5f18885647c4",
     "vendor/gnuplot/gnuplot.js": "72fbcf1029670ea7453eafacefbff36f3c21a8a42b15fae9030144344425f7b2",
