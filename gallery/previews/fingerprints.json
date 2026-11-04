@@ -1,19 +1,19 @@
 {
   "dependencies": {
-    "index.html": "dcd883d7ebef4c234e5d62ea6a044165489cbb0ca12e2d2255ecd5970a669fee",
+    "index.html": "2a541c856d0217d1a1e9f75c4e22d08da8e4cb953cb950c0a63fcf10f9fb5023",
     "fragment-kit.config.json": "fd13349414b57eb321ff615a6afd40a43f189ff735dba3eff18ce93b58cf11ec",
-    "src/gnuplot-sandbox.js": "d13f1e018d634fa39a371ee55291b0d24e96d0da86c1f6ffb48bb17707e3f5b5",
-    "src/app.js": "7a00fb245dab1fd63aa088717f77a62f1c7c6c43d7ab38ddb6498afcbaa976ec",
+    "src/gnuplot-sandbox.js": "235ff57bbf37b2a79487b32ada23beb7213ff04c6dc9a1bbbbe6827b755e9f88",
+    "src/app.js": "3843c7db4500ff6481f49cdd19561f693b1d4652f03102355c0bcf3c0d4b454c",
     "src/app.css": "baece7e8c7d1abbdb65bb2f768f0eb8cf241fe668b97e9ae5b4947c1b1255806",
-    "src/fragment-config.mjs": "8753064edeee6d30f42b0cd41e87334f2c4c76a9ccd6436a89ebbb535d2ac27b",
+    "src/fragment-config.mjs": "2446368f99fd049b176fcc4d6884b7e42216c15a79ebdd4483c8c21a1102b275",
     "src/examples.js": "d87eb3d4dcdaf7eea49e505d218e230ccad835d2c91496a9188c2bb977823a62",
     "src/gnuplot-core.js": "8460e8e5b7eec0666dfc44139139a17ecf00d027eded30b1b16a5f18885647c4",
     "vendor/gnuplot/gnuplot.js": "72fbcf1029670ea7453eafacefbff36f3c21a8a42b15fae9030144344425f7b2",
     "vendor/gnuplot/gnuplot.wasm": "b100192974f908250b67c02d1131e270b74e74bc8f80fab1d2fd1adaf0f3fbe0",
-    "vendor/fragment-kit-v0.3.1/src/core/url-state.js": "5cd6bc5fcf217805fa463c7829441f265e77dbd98c210660b6dfbe6df238d6de",
-    "vendor/fragment-kit-v0.3.1/vendor/hashbin-sdk-v0.4.0.mjs": "82f25ffe41a0ff79a060fb593754a286e1c85c2502878ab387c3d0045b749fa5"
+    "vendor/fragment-kit-v0.3.3/src/core/url-state.js": "5cd6bc5fcf217805fa463c7829441f265e77dbd98c210660b6dfbe6df238d6de",
+    "vendor/fragment-kit-v0.3.3/vendor/hashbin-sdk-v0.4.0.mjs": "82f25ffe41a0ff79a060fb593754a286e1c85c2502878ab387c3d0045b749fa5"
   },
-  "renderer": "21a0bb3423fdbedea3356ba71b38d1e2b5f8f20242c79c1ddfefa579de8e3b52",
+  "renderer": "c146356157683ba9c7736f50f2edf15fe30cdfb64b31b76845a7cc37ead41dae",
   "examples": {
     "damped-wave": {
       "document": "9af53827a1ff74dd3b016262e8dcdad794965588c57e3fdcdc5223c4b2832fb8",

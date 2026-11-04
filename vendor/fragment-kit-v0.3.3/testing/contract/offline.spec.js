@@ -24,7 +24,7 @@ test('atomic install, offline reload, corrupt-cache detection and repair', async
   await expect.poll(() => page.evaluate(async kitURL => {
     const { OfflineClient } = await import(kitURL);
     return (await new OfflineClient().status()).ready;
-  }, adapter.kitURL)).toBe(true);
+  }, adapter.kitURL), {timeout:60000}).toBe(true);
   await expect(page.locator('#offline-status')).toHaveText('Available offline', { timeout: 60000 });
 });
 

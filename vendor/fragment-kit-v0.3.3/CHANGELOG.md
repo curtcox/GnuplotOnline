@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.3.3 — 2026-11-04
+
+* Verify Publish redirects against the bounded original transaction bytes and
+  compare normalized documents, preserving pre-kit envelope ordering and CIDs.
+* Reject snapshots that differ from their saved content; preserve approved and
+  cancelled return snapshots through the actual immutable SDK.
+
+## 0.3.2 — 2026-11-04
+
+* Match offline repair's polling deadline to the bounded 60-second acceptance
+  window for large, verified consumer precaches on CI runners.
+
 ## 0.3.1 — 2026-11-04
 
 * Contract tests scope QR actions to their dialog and allow large consumer

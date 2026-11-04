@@ -1,8 +1,8 @@
 import { LocalDrafts, RenderScheduler, HashBinPanel, ShareClient, createShell, mountMobileTabs,
-  createQrDialog, createShareDialog } from '../vendor/fragment-kit-v0.3.1/src/index.js';
+  createQrDialog, createShareDialog } from '../vendor/fragment-kit-v0.3.3/src/index.js';
 import { config, type, urlState, HashBinDocuments, HashBinStore, compress, decompress } from './fragment-config.mjs';
 // Keep legacy test/document entry points during this migration; production uses imports.
-import * as Kit from '../vendor/fragment-kit-v0.3.1/src/index.js';
+import * as Kit from '../vendor/fragment-kit-v0.3.3/src/index.js';
 Object.assign(globalThis, { HashBinDocuments: { ...HashBinDocuments, ...Object.fromEntries(['isCID','cidLength','bytes','encode64','decode64','verify'].map(key => [key, Kit[key]])) },
   LZString: { compressToEncodedURIComponent: compress, decompressFromEncodedURIComponent: decompress } });
 /* Browser glue. The engine, documents and exports stay independent of the UI. */
