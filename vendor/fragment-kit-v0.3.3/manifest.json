@@ -1,6 +1,6 @@
 {
   "name": "fragment-kit",
-  "version": "0.3.1",
+  "version": "0.3.3",
   "files": {
     "src/core/bytes.js": "9199997bd3d140ce63246fd78ba9eabc0955aa782197fdf2b6334c2d2cf8119d",
     "src/core/cid.js": "de418479e0c32209e751df3e479315ca2d26c29cc17a0c0331837430d761ebdd",
@@ -15,7 +15,7 @@
     "src/gallery/gallery.js": "7780ae0ab5ac6b858acb946eff1a6f3f992c8bdff375257689e5b738ee87c71f",
     "src/globals.js": "b6983ed34fab0b7f7a07587424334d669bf46a61d32db838789ee5715cc9b81c",
     "src/hashbin/panel.js": "8cad688e63e51f0a54e2e1ad611a00998c88ef4e0d3de54e7b6ef07f7c26fffb",
-    "src/hashbin/store.js": "f86b1b7ea74bfd195325935e4523aaa866b4e4df6aee29d30e940e18f620c32d",
+    "src/hashbin/store.js": "dcc8368ea81602770142a42f59407a7bf1e52d835e92c543a3e8dc15238f5b19",
     "src/index.js": "4505c163cb84339c9d7880e2a4c5c1b9f50e181c4f0abb970c193ed75f0e57fc",
     "src/offline/client.js": "994eb6681466b04a61d07873f028d1b864b9ad0bfccf4deba9d3d773f393c524",
     "src/offline/sw-core.js": "2f291202696a546d78f2d5cf4c5801e2eded80f53cc8b9a69aec52b684326677",
@@ -54,11 +54,11 @@
     "tools/stage.mjs": "feaf83ddb35cda1157aab4cf5a53faf89a8365836412aa26011815cbdcf14568",
     "tools/vendor-jsqr.mjs": "cfe3520d4765adacd6ab99ab7bd2390c9a9de0e3619de3a422d5d1ed96fdfee1",
     "tools/vendor-sync.mjs": "2aa1991494145e81746a299e706c6ac36cc64a6bf6602504ec64eb336c41184b",
-    "testing/contract/adapter.js": "243b683cda3e342681ee5aed4625ca4b08a300de1ff8025ee4614ab8bcb092c1",
+    "testing/contract/adapter.js": "7b3c5d8199e6aee1ad744049f886109ced01ca384632c306beea5315aa80d807",
     "testing/contract/draft-recovery.spec.js": "ce1d89c6a76f071ca1139b73789a95b81d61f70048bc763c6e5eced056d77fa4",
     "testing/contract/hashbin-callback.spec.js": "251c10fbd7ec7932c72f68bf227fc5980b21dcb1e4bfea1fb73a9b5c577b69aa",
     "testing/contract/mobile-layout.spec.js": "4fbc0505de68723302c8a5c22a240961462f53886e2dc1331736920397eb9535",
-    "testing/contract/offline.spec.js": "d18020549cd2ce06ba1b7d53b3de8b3210b04f8496e0672d4f048bd742d83f31",
+    "testing/contract/offline.spec.js": "c45d44ffbecb5ce6b1a9146a604619b7f0718274978f64aa9fae7dc51a801e50",
     "testing/contract/qr-roundtrip.spec.js": "9faa87ba72f503a3d18d4e3e562aae0aee4a17b82323440964ddd7be125dec5a",
     "testing/contract/sharing.spec.js": "88ff9e43249c1caf2ac650667bb7bf392c4470e5e16e71274cc1dc1d93f08df5",
     "testing/contract/url-identity.spec.js": "b5c68b73e4a4e132ae0d17dcb61313d9c52b700cb520f4c133be64d735fe92eb",
@@ -69,14 +69,14 @@
     "testing/fixtures/qr-known.json": "9cce69d187ff42e6ef6656b956dfa5007ad5a67889a317e3398cd765e9bdff5a",
     "testing/fixtures/qr-known.png": "0f4b9ab0ed156e49ae2ba43bd40a9163560f427f0b4ff9e889d6fd3960ea7869",
     "testing/playwright.config.js": "184a5e02507700b76e80830d2bb23c218ae9e6f0c64821eab662e5ae9a74c565",
-    "docs/contracts.md": "6e2ff1ca590b48456aff93b1a4f681d1e8a4355c1f03bf05bbc3edba39b2fe7f",
+    "docs/contracts.md": "44b6f59067700dd151799ce030fd64bd8ed10c4dd72b58a078cd8d1cccaa1e73",
     "docs/implementation-status.md": "faf922cdce1fdc8646fe921fc97411a6cb12340dd1c090352a995f0a39cd3233",
-    "docs/index.html": "6154cb2f2ee0c89da9aaaa60ff89f8acbac6ce4989293bc91e694cf2e55a7af6",
-    "docs/migration.md": "02d73e04d2e8a2ce8c28d289f02e35901afb69dfdf30675f63176bf12d0f5806",
+    "docs/index.html": "96e3b9d10cae23dd3f913b2886353cfef2add58a0287b798f9fd50cd970b62f5",
+    "docs/migration.md": "410bdf9058cbac98a8d3036708644f7ff51ea255c130cfba2a979c5c8bd907f2",
     "docs/site.css": "395b079470170691125899aa7a74ab2ad16725744862524015fe475a1ede62c9",
-    "docs/tooling.md": "d35c88681415232a0e2f5db5650310d136f36ddf5808f46f9c0c3de987aa761a",
-    "package.json": "100c5d4f047ce880a643f3295aabe84ac1d8ff6fdb38bd358124b06354f26f88",
+    "docs/tooling.md": "e6df6cb503887fe099e5ec846262f42fe8af1512421993b306e4b126bd0534ea",
+    "package.json": "b2f083417df69d829b6a0212071fe41cff0a5dbdbc7dd7f13ce3cd9a2d93990a",
     "LICENSE": "4b98ca359e198179443e1cd7c604f6cc579e7879122583352fbaa1bddb11ae53",
-    "CHANGELOG.md": "edb882723e616fbefc30fc2650816338e813f9559af02c01bb764bd8496ecd4a"
+    "CHANGELOG.md": "b1321fecd8e9782143017e1bb3929a4536baf77d78be02bf594a6696e772ccb3"
   }
 }

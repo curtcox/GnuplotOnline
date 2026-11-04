@@ -167,7 +167,7 @@ Program URLs always open the linked document, regardless of browser history or l
 
 ## Shared browser tools
 
-This migration uses [Fragment Kit v0.3.1](https://github.com/curtcox/Tools-for-pages-with-state-in-URL-fragments/releases/tag/v0.2.0)
+This migration uses [Fragment Kit v0.3.3](https://github.com/curtcox/Tools-for-pages-with-state-in-URL-fragments/releases/tag/v0.2.0)
 for URL readers, verified HashBin loads/Publish, QR generation and camera/image
 scanning, drafts, sharing, offline verification, mobile tabs, dialogs and gallery.
 The document adapter and legacy URL writer are in `src/fragment-config.mjs`.

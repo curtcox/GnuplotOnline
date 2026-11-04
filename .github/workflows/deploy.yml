@@ -15,4 +15,4 @@ jobs:
     uses: curtcox/Tools-for-pages-with-state-in-URL-fragments/.github/workflows/pages.yml@v2
     with:
       path: '.'
-      verify-marker: gnuplot-fragment-kit-v0.3.1
+      verify-marker: gnuplot-fragment-kit-v0.3.3

@@ -66,15 +66,37 @@ export class HashBinStore {
     return error.message;
   }
   async published(hash) {
-    if (!new URLSearchParams(hash.replace(/^#/, '')).has('hashbin_publish')) return null;
-    let snapshot;
+    const params = new URLSearchParams(hash.replace(/^#/, ''));
+    if (!params.has('hashbin_publish')) return null;
+    let snapshot, original;
+    const checkedSnapshot = value => {
+      if (!value) return value;
+      const normalized = this.documents.normalize(value);
+      if (original && JSON.stringify(this.documents.parse(text(original))) !== JSON.stringify(normalized)) throw new Error('Publish snapshot does not match saved content.');
+      return value;
+    };
     try {
-      const { cid, clientState } = await (await this.init()).handlePublishCallback({ hash });
+      const client = await this.init();
+      // The pinned SDK consumes this transaction during its callback. Capture its
+      // bounded original bytes first: older consumers serialized envelope keys in
+      // a different order, so reserializing their snapshot changes the CID.
+      const raw = this.transactionStorage.getItem(`hashbin:publish:${this.clientId}:${params.get('hashbin_publish')}`);
+      if (raw != null) {
+        bounded(raw, this.config.maxBytes * 3 + 65536);
+        const transaction = JSON.parse(raw);
+        if (typeof transaction.bytes === 'string') original = decode64(transaction.bytes, this.config.maxBytes);
+        else if (isCID(transaction.cid) && cidLength(transaction.cid) <= 64) original = decode64(transaction.cid.slice(8), this.config.maxBytes);
+      }
+      const { cid, clientState } = await client.handlePublishCallback({ hash });
       snapshot = clientState?.snapshot;
       if (!isCID(cid)) throw new Error('HashBin returned an invalid CID.');
-      if (clientState?.snapshot) await verify(cid, bytes(this.documents.serialize(clientState.snapshot)));
-      return { cid, snapshot: clientState?.snapshot };
-    } catch (error) { return { error: this.message(error), snapshot: error.clientState?.snapshot ?? snapshot ?? null }; }
+      if (original) await verify(cid, original);
+      else if (snapshot) await verify(cid, bytes(this.documents.serialize(snapshot)));
+      return { cid, snapshot: checkedSnapshot(snapshot) };
+    } catch (error) {
+      try { return { error: this.message(error), snapshot: checkedSnapshot(error.clientState?.snapshot ?? snapshot ?? null) }; }
+      catch (invalid) { return { error: invalid.message, snapshot: null }; }
+    }
   }
   async retireLegacyTokens() {
     const key = `hashbin:tokens:${this.clientId}`;

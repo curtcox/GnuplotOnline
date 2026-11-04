@@ -8,10 +8,10 @@ jobs:
   test:
     uses: curtcox/Tools-for-pages-with-state-in-URL-fragments/.github/workflows/test.yml@v2
     with:
-      kit-path: vendor/fragment-kit-v0.3.1
+      kit-path: vendor/fragment-kit-v0.3.3
       contract-config: testing-contract.config.mjs
       browser-command: node tests/browser/url-state.cjs && node tests/browser/all.cjs http://127.0.0.1:8000/ "$BROWSER" && node tests/browser/legacy-publish.cjs
   kit:
     uses: curtcox/Tools-for-pages-with-state-in-URL-fragments/.github/workflows/kit-check.yml@v2
     with:
-      kit-path: vendor/fragment-kit-v0.3.1
+      kit-path: vendor/fragment-kit-v0.3.3
