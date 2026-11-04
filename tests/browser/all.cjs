@@ -146,7 +146,7 @@ async function run(label, task) { const start = Date.now(); await task(); consol
     errors.splice(0,errors.length,...errors.filter(e=>!e.includes('example.invalid')));
     const registeredClient = /name="hashbin-client-id" content="([^"]+)"/.exec(fs.readFileSync('index.html','utf8'))[1];
     await p.route('**/vendor/hashbin-sdk-v0.4.0.mjs', route=>route.fulfill({ contentType:'application/javascript', body: `export class HashBinClient {
-      constructor(options) { if (options.clientId !== ${JSON.stringify(registeredClient)} || options.redirectUri !== ${JSON.stringify('https://curtcox.github.io/GnuPlotOnline/')}) throw new Error('Incorrect HashBin registration configuration'); }
+      constructor(options) { if (options.clientId !== ${JSON.stringify(registeredClient)} || options.redirectUri !== ${JSON.stringify('https://curtcox.github.io/GnuplotOnline/')}) throw new Error('Incorrect HashBin registration configuration'); }
     }` }));
     await p.click('#more'); await p.click('#hashbin-save'); await p.waitForFunction(()=>document.getElementById('hashbin-confirm').textContent==='Review on HashBin' && !document.getElementById('hashbin-confirm').disabled); assert.match(await p.locator('#hashbin-message').innerText(),/approve the save on hashbin\.org/); await p.click('#hashbin-dialog .fk-close');
     const payload=Docs.serialize({ src:'set title "Slow old plot"\nplot x', files:{}, gnuplot:{} }), remote=cidFor(payload);

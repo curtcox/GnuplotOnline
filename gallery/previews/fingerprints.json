@@ -1,7 +1,7 @@
 {
   "dependencies": {
     "index.html": "b131b46d096522707971e896eef1afb7e9d2f78402f3d1411176e2d314fa52bf",
-    "fragment-kit.config.json": "feff7b21aa64ed0bfd99c714e289b5f7def053a03dbe6e88fec25d66fe4751ec",
+    "fragment-kit.config.json": "fd13349414b57eb321ff615a6afd40a43f189ff735dba3eff18ce93b58cf11ec",
     "src/gnuplot-sandbox.js": "b96c02bdf8eb0afec4cc67d8228e7fabb5150fda920b7ba1441dc5803888c96b",
     "src/app.js": "9b258822c75598f97696acaafc9bf3bd4268d160ca77a07df8a1654a54e2f2a7",
     "src/app.css": "baece7e8c7d1abbdb65bb2f768f0eb8cf241fe668b97e9ae5b4947c1b1255806",
