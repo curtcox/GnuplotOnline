@@ -4,6 +4,8 @@
   const options = self.FragmentKitOfflineConfig ?? {};
   if (!manifest?.prefix || !manifest.version?.startsWith(manifest.prefix + '-') || !manifest.assets?.length) throw new Error('Invalid prefixed offline manifest.');
   const cacheName = manifest.version, prefix = manifest.prefix + '-';
+  const concurrency = options.downloadConcurrency ?? 6;
+  if (!Number.isInteger(concurrency) || concurrency < 1 || concurrency > 16) throw new Error('Invalid offline download concurrency.');
   const absolute = asset => new URL(asset, self.registration.scope).href;
   const hashes = new Map(Object.entries(manifest.hashes).map(([asset, hash]) => [absolute(asset), hash]));
   const hex = value => Array.from(new Uint8Array(value), byte => byte.toString(16).padStart(2, '0')).join('');
@@ -25,7 +27,10 @@
       const stagingName = cacheName + '-staging-' + crypto.randomUUID();
       const staging = await caches.open(stagingName);
       try {
-        const results = await Promise.allSettled(manifest.assets.map(async asset => {
+        const pending = manifest.assets.slice();
+        const results = await Promise.allSettled(Array.from({ length: Math.min(concurrency, pending.length) }, async () => {
+          while (pending.length) {
+          const asset = pending.shift();
           const url = absolute(asset);
           let response;
           try { response = await fetch(url, { cache: 'reload' }); if (!response.ok) throw new Error('HTTP ' + response.status); }
@@ -37,6 +42,7 @@
           const checked = await verified(response, url);
           if (!checked) throw new Error('Offline download did not match its manifest: ' + asset);
           await staging.put(url, checked);
+          }
         }));
         const failed = results.find(result => result.status === 'rejected');
         if (failed) throw failed.reason;
@@ -51,7 +57,7 @@
   }
   self.addEventListener('install', event => event.waitUntil(populate()));
   self.addEventListener('activate', event => event.waitUntil((async () => {
-    for (const name of await caches.keys()) if (name.startsWith(prefix) && name !== cacheName && !(options.extraCaches ?? []).includes(name)) await caches.delete(name);
+    for (const name of await caches.keys()) if (name.startsWith(prefix) && name !== cacheName && !(options.extraCaches ?? []).includes(name) && !options.preserveCache?.(name)) await caches.delete(name);
     await self.clients.claim();
   })()));
   self.addEventListener('fetch', event => {

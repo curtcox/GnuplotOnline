@@ -1,6 +1,6 @@
 # Implementation status
 
-This is the 0.2.0 release-candidate acceptance snapshot. The master plan's phase definitions
+This is the 0.3.0 release-candidate acceptance snapshot. The master plan's phase definitions
 are acceptance criteria, not a record of actions already performed.
 
 Local runtime, documentation, baseline corpora, demo, tooling and workflows are
@@ -43,3 +43,8 @@ are public. The [v0.1.0 release](https://github.com/curtcox/Tools-for-pages-with
 
 This file is included in immutable release artifacts. Current rollout state is
 tracked in `todo/rollout-status.md` in the source repository.
+
+The 0.3.0 candidate adds bounded precache downloads, cache-family preservation,
+consumer metadata that participates in manifest versions, and generated CommonJS
+manifest support. Local validation passed 272 unit tests and 68 browser checks in
+Chromium, WebKit, Pixel 7 and iPhone 14. Remote rollout remains recorded separately.

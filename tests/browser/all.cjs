@@ -7,14 +7,14 @@ const path = require('node:path');
 const base = process.argv[2] || 'http://127.0.0.1:8000/';
 const name = process.argv[3] || 'chromium';
 const { HashBinDocuments: Docs } = require('../../src/fragment-config.mjs');
-Docs.isCID=require('../../vendor/fragment-kit-v0.2.0/src/core/cid.js').isCID;
+Docs.isCID=require('../../vendor/fragment-kit-v0.3.1/src/core/cid.js').isCID;
 const examples = require('../../src/examples.js');
 fs.mkdirSync('test-results', { recursive: true });
 let browser;
 const errors = [];
 async function context(options = {}) {
   const context = await browser.newContext({ serviceWorkers: 'block', acceptDownloads: true, ...options });
-  await context.route('https://cdnjs.cloudflare.com/**', route => route.fulfill({ contentType: 'application/javascript', body: fs.readFileSync('vendor/fragment-kit-v0.2.0/vendor/lz-string-1.5.0.js','utf8') }));
+  await context.route('https://cdnjs.cloudflare.com/**', route => route.fulfill({ contentType: 'application/javascript', body: fs.readFileSync('vendor/fragment-kit-v0.3.1/vendor/lz-string-1.5.0.js','utf8') }));
   // Content-Security-Policy violations count as page errors: the policy must not block the app itself.
   await context.exposeBinding('__cspViolation', (_, text) => errors.push('CSP: ' + text));
   await context.addInitScript(() => addEventListener('securitypolicyviolation', event => globalThis.__cspViolation?.(`${event.violatedDirective} ${event.blockedURI} ${location.pathname}`)));
@@ -172,12 +172,12 @@ async function run(label, task) { const start = Date.now(); await task(); consol
       constructor(options){this.options=options}
       publish(content,{clientState}){const mode=localStorage.getItem('test:publish')||'approve';return cid(content).then(saved=>{
         if(mode==='cancel')throw new Error('access_denied');
-        if(mode==='redirect'){sessionStorage.setItem('test:state',JSON.stringify(clientState));location.href=location.origin+location.pathname+'#hashbin_publish=t&cid='+saved;return {redirected:true};}
+        if(mode==='redirect'||mode==='fragment'){sessionStorage.setItem('test:state',JSON.stringify(clientState));if(mode==='fragment')location.hash='hashbin_publish=t&cid='+saved;else location.href=location.origin+location.pathname+'#hashbin_publish=t&cid='+saved;return {redirected:true};}
         return {cid:saved};});}
       async handlePublishCallback({hash}){const clientState=JSON.parse(sessionStorage.getItem('test:state'));return {cid:new URLSearchParams(hash.slice(1)).get('cid'),clientState};}
       async disconnect(){localStorage.removeItem('hashbin:tokens:test-client');localStorage.setItem('test:revoked','yes');}
     }`;
-    await auth.route('**/vendor/hashbin-sdk-v0.4.0.mjs', route=>route.fulfill({contentType:'application/javascript',body:fs.readFileSync('vendor/fragment-kit-v0.2.0/vendor/hashbin-sdk-v0.4.0.mjs','utf8').replace(/\bHashBinClient\b/g,'OriginalHashBinClient').replace('export class OriginalHashBinClient','class OriginalHashBinClient')+'\n'+sdk}));
+    await auth.route('**/vendor/hashbin-sdk-v0.4.0.mjs', route=>route.fulfill({contentType:'application/javascript',body:fs.readFileSync('vendor/fragment-kit-v0.3.1/vendor/hashbin-sdk-v0.4.0.mjs','utf8').replace(/\bHashBinClient\b/g,'OriginalHashBinClient').replace('export class OriginalHashBinClient','class OriginalHashBinClient')+'\n'+sdk}));
     await auth.addInitScript(()=>{ if (window !== window.top) return; if (!sessionStorage.getItem('test:seeded')) { sessionStorage.setItem('test:seeded','1'); localStorage.setItem('hashbin:tokens:test-client','{"refreshToken":"old"}'); } });
     await a.goto(base); await rendered(a); await a.waitForFunction(()=>localStorage.getItem('test:revoked')==='yes' && !localStorage.getItem('hashbin:tokens:test-client'));
     const save=async()=>{if(!await a.locator('#fk-more-drawer').isVisible())await a.click('#more');await a.click('#hashbin-save'); await a.waitForFunction(()=>document.getElementById('hashbin-confirm').textContent==='Review on HashBin' && !document.getElementById('hashbin-confirm').disabled);};
@@ -188,6 +188,12 @@ async function run(label, task) { const start = Date.now(); await task(); consol
     await a.evaluate(()=>localStorage.setItem('test:publish','redirect')); await edit(a,'set title "Restored source"\nplot x'); await a.waitForTimeout(300); await save();
     await Promise.all([a.waitForURL('**#hashbin_publish=*'),a.click('#hashbin-confirm')]); await rendered(a);
     await a.waitForFunction(()=>document.getElementById('hashbin-status').textContent==='Saved to HashBin.'); assert.match(await a.evaluate(()=>editor.getValue()),/Restored source/); assert.ok(isCIDHash(new URL(a.url()).hash));
+    await a.evaluate(()=>localStorage.setItem('test:publish','fragment'));await edit(a,'set title "Fragment callback"\nplot sin(x)');await save();await a.click('#hashbin-confirm');
+    await a.waitForFunction(()=>document.getElementById('hashbin-status').textContent==='Saved to HashBin.'&&!location.hash.includes('hashbin_publish='));
+    let staleRequests=0;await a.route('https://256t.us/**',route=>{staleRequests++;return route.fulfill({status:404});});
+    await a.evaluate(()=>dispatchEvent(new HashChangeEvent('hashchange',{newURL:location.origin+location.pathname+'#hashbin_publish=consumed'})));
+    await a.waitForTimeout(100);assert.equal(staleRequests,0,'a late event for the consumed callback must be ignored');assert.match(await a.evaluate(()=>editor.getValue()),/Fragment callback/);
+    await a.locator('#hashbin-dialog .fk-close').click();
     await a.evaluate(()=>localStorage.removeItem('test:publish')); if(await a.locator('#fk-more-drawer').isVisible())await a.locator('#fk-more-drawer .fk-close').click();
     await edit(a,'plot x*x'); await a.waitForFunction(()=>!location.hash); assert.ok(new URL(a.url()).searchParams.has('compressed'));
     await auth.close();
@@ -237,9 +243,9 @@ async function run(label, task) { const start = Date.now(); await task(); consol
       // Fetching the corrupted CSS revalidates and heals that entry. Corrupt an
       // unrequested precached sample to exercise an explicit full-cache repair.
       await p.evaluate(async()=>{const cache=await caches.open((await caches.keys()).find(name=>name.startsWith('gnuplot-')));await cache.put(new URL('examples/damped-wave.gp',location.href),new Response('tampered'));});
-      assert.equal(await p.evaluate(async()=>{const {OfflineClient}=await import('./vendor/fragment-kit-v0.2.0/src/index.js');return (await new OfflineClient().status()).ready;}),false);
+      assert.equal(await p.evaluate(async()=>{const {OfflineClient}=await import('./vendor/fragment-kit-v0.3.1/src/index.js');return (await new OfflineClient().status()).ready;}),false);
       await p.click('#more');await p.click('#offline-repair');
-      await p.waitForFunction(async()=>{const {OfflineClient}=await import('./vendor/fragment-kit-v0.2.0/src/index.js');return (await new OfflineClient().status()).ready;});
+      await p.waitForFunction(async()=>{const {OfflineClient}=await import('./vendor/fragment-kit-v0.3.1/src/index.js');return (await new OfflineClient().status()).ready;});
       await p.locator('#fk-more-drawer .fk-close').click();
       await new Promise(resolve => { server.close(resolve); server.closeAllConnections(); });
       await assert.rejects(fetch(offlineBase));

@@ -2,6 +2,7 @@ import { test, expect } from '@playwright/test';
 import { adapter, ready, expectSource, expectWrittenURL } from './adapter.js';
 import { offlineServer } from '../fixtures/offline-server.mjs';
 test.use({ serviceWorkers: 'allow' });
+test.setTimeout(120000);
 
 test('atomic install, offline reload, corrupt-cache detection and repair', async ({ page, context }) => {
   await ready(page);

@@ -1,8 +1,8 @@
 import { LocalDrafts, RenderScheduler, HashBinPanel, ShareClient, createShell, mountMobileTabs,
-  createQrDialog, createShareDialog } from '../vendor/fragment-kit-v0.2.0/src/index.js';
+  createQrDialog, createShareDialog } from '../vendor/fragment-kit-v0.3.1/src/index.js';
 import { config, type, urlState, HashBinDocuments, HashBinStore, compress, decompress } from './fragment-config.mjs';
 // Keep legacy test/document entry points during this migration; production uses imports.
-import * as Kit from '../vendor/fragment-kit-v0.2.0/src/index.js';
+import * as Kit from '../vendor/fragment-kit-v0.3.1/src/index.js';
 Object.assign(globalThis, { HashBinDocuments: { ...HashBinDocuments, ...Object.fromEntries(['isCID','cidLength','bytes','encode64','decode64','verify'].map(key => [key, Kit[key]])) },
   LZString: { compressToEncodedURIComponent: compress, decompressFromEncodedURIComponent: decompress } });
 /* Browser glue. The engine, documents and exports stay independent of the UI. */
@@ -281,6 +281,7 @@ Object.assign(globalThis, { HashBinDocuments: { ...HashBinDocuments, ...Object.f
         apply(doc, { run: parsed.run }); refreshShare({ address: true });
       } else if (parsed?.kind === 'cid') {
         await hashbin.load(parsed.cid);
+        if (loadRevision === revision && hashbin.status.textContent !== 'Loaded from HashBin.') { setError(hashbin.status.textContent); $('status').textContent = hashbin.status.textContent; }
         return;
       }
       if (parsed.kind === 'none') { const params = new URL(location.href).searchParams; apply({ src: GnuplotExamples.defaultSource, gnuplot: { width: params.get('w') || 800, height: params.get('h') || 600, background: params.get('bg') } }, {run:parsed.run}); }
@@ -289,7 +290,7 @@ Object.assign(globalThis, { HashBinDocuments: { ...HashBinDocuments, ...Object.f
     finally { document.body.dataset.ready = 'true'; }
   }
   let lastNavigation = location.href;
-  const navigate = () => { if (location.href === lastNavigation) return; lastNavigation = location.href; void loadUrl(); };
+  const navigate = event => { if (event.type === 'hashchange' && event.newURL !== location.href) return; if (location.href === lastNavigation) return; lastNavigation = location.href; void loadUrl(); };
   window.addEventListener('hashchange', navigate); window.addEventListener('popstate', navigate);
   await loadUrl({ initial: true });
 })();

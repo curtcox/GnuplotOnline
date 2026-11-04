@@ -1,6 +1,6 @@
 # Gnuplot Online
 
-This is a buildless static GitHub Pages application. Use browser-native ES modules for Fragment Kit and retain CommonJS exports for app-owned engine modules. Shared contracts are in `vendor/fragment-kit-v0.2.0/docs/contracts.md`. Do not add a production bundler or
+This is a buildless static GitHub Pages application. Use browser-native ES modules for Fragment Kit and retain CommonJS exports for app-owned engine modules. Shared contracts are in `vendor/fragment-kit-v0.3.1/docs/contracts.md`. Do not add a production bundler or
 server. Serve the repository root over HTTP, never file://.
 
 ## Important contracts
@@ -46,7 +46,7 @@ Explicit program, source, example and CID URLs always load their document, indep
 
 ## Shared kit
 
-Pin Fragment Kit v0.2.0 byte for byte. Do not edit files under its vendor folder.
+Pin Fragment Kit v0.3.1 byte for byte. Do not edit files under its vendor folder.
 `fragment-kit.config.json` is the app config; the registered HashBin client ID
 stays in the existing meta tag. Schema validation, data files, opaque-origin
 execution, timeouts, SVG sanitization and export stay app-owned.

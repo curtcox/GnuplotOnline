@@ -15,8 +15,8 @@
     "gallery/previews",
     "icons",
     "vendor/gnuplot",
-    "vendor/fragment-kit-v0.2.0/src",
-    "vendor/fragment-kit-v0.2.0/vendor",
+    "vendor/fragment-kit-v0.3.1/src",
+    "vendor/fragment-kit-v0.3.1/vendor",
     "fragment-kit.config.json"
   ]
 }

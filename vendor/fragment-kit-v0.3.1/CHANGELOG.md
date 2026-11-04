@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.3.1 — 2026-11-04
+
+* Contract tests scope QR actions to their dialog and allow large consumer
+  precaches enough time for verified install and repair.
+
+## 0.3.0 — 2026-11-04
+
+* Offline: bounded download concurrency, consumer cache-preservation hooks,
+  app-owned manifest metadata and CommonJS-compatible generated manifests.
+* R migration keeps optional package caches separate from app readiness.
+
 ## 0.2.0 — 2026-11-04
 
 * Consumer migration: adapter hooks for Ace/editor assertions, legacy link writers,
