@@ -177,8 +177,9 @@ Serve the root, then generate covers with `npm run previews`. Use
 `node scripts/render-gallery.mjs --check` for a browser-free fingerprint check.
 Migration acceptance and deployed checks are recorded in `docs/fragment-kit-migration.md`.
 
-## Prepared interface update
+## Compact interface
 
-This branch prepares Fragment Kit v0.3.5 for compact controls, readable dialogs,
-and single-pane or split workspace views. On phones, status details are in More.
-Shared release publication and site deployment are still pending.
+This app uses released Fragment Kit v0.3.5 for compact controls, readable dialogs,
+and individual-pane or split workspace views. On phones, primary feedback stays
+visible while status details are available in More.
+Current deployment evidence is recorded in the [shared rollout status](https://github.com/curtcox/Tools-for-pages-with-state-in-URL-fragments/blob/main/todo/rollout-status.md).
