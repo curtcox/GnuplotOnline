@@ -176,3 +176,9 @@ New links continue to use the existing query forms while v1 readers roll out.
 Serve the root, then generate covers with `npm run previews`. Use
 `node scripts/render-gallery.mjs --check` for a browser-free fingerprint check.
 Migration acceptance and deployed checks are recorded in `docs/fragment-kit-migration.md`.
+
+## Prepared interface update
+
+This branch prepares Fragment Kit v0.3.5 for compact controls, readable dialogs,
+and single-pane or split workspace views. On phones, status details are in More.
+Shared release publication and site deployment are still pending.

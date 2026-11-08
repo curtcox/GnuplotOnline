@@ -1,7 +1,7 @@
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
 const GnuplotClient = require('../src/gnuplot-client.js');
-const RenderScheduler = require('../vendor/fragment-kit-v0.3.3/src/core/scheduler.js').RenderScheduler;
+const RenderScheduler = require('../vendor/fragment-kit-v0.3.5/src/core/scheduler.js').RenderScheduler;
 test('a hard timeout terminates a stuck worker and a new run uses a fresh worker', async () => {
   const workers = [];
   const client = new GnuplotClient({ timeout: 15, workerFactory: () => { const worker = { postMessage() {}, terminate() { this.terminated = true; } }; workers.push(worker); return worker; } });
