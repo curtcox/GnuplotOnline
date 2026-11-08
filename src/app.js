@@ -1,8 +1,8 @@
-import { LocalDrafts, RenderScheduler, HashBinPanel, ShareClient, createShell, mountMobileTabs,
-  createQrDialog, createShareDialog } from '../vendor/fragment-kit-v0.3.3/src/index.js';
+import { LocalDrafts, RenderScheduler, HashBinPanel, ShareClient, compactShell,createShell, mountMobileTabs,
+  createQrDialog, createShareDialog } from '../vendor/fragment-kit-v0.3.5/src/index.js';
 import { config, type, urlState, HashBinDocuments, HashBinStore, compress, decompress } from './fragment-config.mjs';
 // Keep legacy test/document entry points during this migration; production uses imports.
-import * as Kit from '../vendor/fragment-kit-v0.3.3/src/index.js';
+import * as Kit from '../vendor/fragment-kit-v0.3.5/src/index.js';
 Object.assign(globalThis, { HashBinDocuments: { ...HashBinDocuments, ...Object.fromEntries(['isCID','cidLength','bytes','encode64','decode64','verify'].map(key => [key, Kit[key]])) },
   LZString: { compressToEncodedURIComponent: compress, decompressFromEncodedURIComponent: decompress } });
 /* Browser glue. The engine, documents and exports stay independent of the UI. */
@@ -125,6 +125,7 @@ Object.assign(globalThis, { HashBinDocuments: { ...HashBinDocuments, ...Object.f
   const shell = createShell({ config });
   shell.header.querySelector('.fk-brand').replaceChildren(...brand.childNodes);
   shell.toolbar.remove(); shell.status.remove();
+  compactShell({header:shell.header,toolbar:document.querySelector(".toolbar"),status:document.querySelector("body > footer")});
   shell.header.querySelector('.fk-more').id = 'more';
   document.querySelector('.mobile-tabs').remove(); document.querySelector('.toolbar > #more').remove();
   for (const id of ['share','qr-open']) document.querySelector('.toolbar').insertBefore($(id), $('extra-tools'));
@@ -158,8 +159,8 @@ Object.assign(globalThis, { HashBinDocuments: { ...HashBinDocuments, ...Object.f
     if ($('size').value !== 'custom') { const [width, height] = $('size').value.split('×').map(Number); settings = GnuplotCore.options({ ...settings, width, height }); syncOptions(); changed(); }
   };
   for (const id of ['width', 'height', 'background']) $(id).onchange = () => { settings = GnuplotCore.options({ ...settings, width: $('width').value, height: $('height').value, background: $('background').value }); syncOptions(); changed(); };
-  $('hide-editor').onclick = () => { document.body.classList.add('editor-hidden'); $('show-editor').hidden = false; resize(); };
-  $('show-editor').onclick = () => { document.body.classList.remove('editor-hidden'); $('show-editor').hidden = true; resize(); };
+  $('hide-editor').onclick = () => tabs.select(1);
+  $('show-editor').onclick = () => tabs.select('split');
   const resize = () => {
     editor.resize();
     if (!$('preview').getBoundingClientRect().width || !$('preview').getBoundingClientRect().height) return;
@@ -174,9 +175,9 @@ Object.assign(globalThis, { HashBinDocuments: { ...HashBinDocuments, ...Object.f
   function setSplit(value) { const width = Math.max(20, Math.min(75, value)); $('editor-pane').style.width = width + '%'; $('splitter').setAttribute('aria-valuenow', Math.round(width)); resize(); }
   $('splitter').onkeydown = event => { if (['ArrowLeft', 'ArrowRight'].includes(event.key)) { event.preventDefault(); setSplit(parseFloat($('splitter').getAttribute('aria-valuenow')) + (event.key === 'ArrowLeft' ? -2 : 2)); } };
   window.addEventListener('resize', resize);
-  const tabs = mountMobileTabs({ panels: [{ label: 'Code', panel: $('editor-pane') }, { label: 'Preview', panel: $('preview-pane') }],
-    container: document.querySelector('.toolbar'), onChange: index => { document.body.dataset.tab = index ? 'preview' : 'code'; resize(); } });
-  tabs.select(1);
+  const tabs = mountMobileTabs({desktop:true, panels: [{ label: 'Code', panel: $('editor-pane') }, { label: 'Preview', panel: $('preview-pane') }],
+    container: document.querySelector('.toolbar'), onChange: index => { document.body.classList.remove('editor-hidden');$('show-editor').hidden=index!==1;document.body.dataset.tab = index===-1?'split':index ? 'preview' : 'code'; resize(); } });
+  if(matchMedia('(max-width:767px)').matches)tabs.select(1);
   const tabButtons = document.querySelectorAll('.fk-tabs button'); tabButtons[0].id = 'tab-code'; tabButtons[1].id = 'tab-preview';
   $('editor-pane').setAttribute('aria-labelledby', 'tab-code'); $('preview-pane').setAttribute('aria-labelledby', 'tab-preview');
   $('fit').onclick = () => { pan?.resize(); pan?.fit(); pan?.center(); };

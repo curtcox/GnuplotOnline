@@ -11,7 +11,7 @@ test('offline manifest covers HTML resources, worker dependencies and gallery fi
       assert.ok(assets.includes(url), `${html}: ${url}`);
     }
   }
-  for (const name of ['src/gnuplot-worker.js','src/gnuplot-core.js','vendor/gnuplot/gnuplot.js','vendor/gnuplot/gnuplot.wasm','vendor/fragment-kit-v0.3.3/vendor/lz-string-1.5.0.js']) assert.ok(assets.includes(name), name);
+  for (const name of ['src/gnuplot-worker.js','src/gnuplot-core.js','vendor/gnuplot/gnuplot.js','vendor/gnuplot/gnuplot.wasm','vendor/fragment-kit-v0.3.5/vendor/lz-string-1.5.0.js']) assert.ok(assets.includes(name), name);
   for (const folder of ['examples','gallery/previews']) for (const file of fs.readdirSync(folder)) assert.ok(assets.includes(folder + '/' + file), file);
   for (const asset of assets.filter(x => !x.startsWith('https:'))) assert.ok(fs.existsSync(asset), asset);
 });

@@ -1,83 +1,83 @@
 {
   "dependencies": {
-    "index.html": "2a541c856d0217d1a1e9f75c4e22d08da8e4cb953cb950c0a63fcf10f9fb5023",
+    "index.html": "3b14f76b9a322feffadf35e9eadd790d4dd58e243c8b6bbbdfef33abe3537064",
     "fragment-kit.config.json": "fd13349414b57eb321ff615a6afd40a43f189ff735dba3eff18ce93b58cf11ec",
-    "src/gnuplot-sandbox.js": "235ff57bbf37b2a79487b32ada23beb7213ff04c6dc9a1bbbbe6827b755e9f88",
-    "src/app.js": "3843c7db4500ff6481f49cdd19561f693b1d4652f03102355c0bcf3c0d4b454c",
+    "src/gnuplot-sandbox.js": "d6a50ec3a75f3db152d752dd2083e0cb4455d125df9be36e11b22f4ac2556b3c",
+    "src/app.js": "852ff2854fb66cb9d95b4117cfc058dfab2b930cf1b9a8652b0b43da97103c3a",
     "src/app.css": "baece7e8c7d1abbdb65bb2f768f0eb8cf241fe668b97e9ae5b4947c1b1255806",
-    "src/fragment-config.mjs": "2446368f99fd049b176fcc4d6884b7e42216c15a79ebdd4483c8c21a1102b275",
+    "src/fragment-config.mjs": "2fdeb8f40e2696aa3ea534664963e15c83178b5a50dfc19cdb087f691b01fed4",
     "src/examples.js": "d87eb3d4dcdaf7eea49e505d218e230ccad835d2c91496a9188c2bb977823a62",
     "src/gnuplot-core.js": "8460e8e5b7eec0666dfc44139139a17ecf00d027eded30b1b16a5f18885647c4",
     "vendor/gnuplot/gnuplot.js": "72fbcf1029670ea7453eafacefbff36f3c21a8a42b15fae9030144344425f7b2",
     "vendor/gnuplot/gnuplot.wasm": "b100192974f908250b67c02d1131e270b74e74bc8f80fab1d2fd1adaf0f3fbe0",
-    "vendor/fragment-kit-v0.3.3/src/core/url-state.js": "5cd6bc5fcf217805fa463c7829441f265e77dbd98c210660b6dfbe6df238d6de",
-    "vendor/fragment-kit-v0.3.3/vendor/hashbin-sdk-v0.4.0.mjs": "82f25ffe41a0ff79a060fb593754a286e1c85c2502878ab387c3d0045b749fa5"
+    "vendor/fragment-kit-v0.3.5/src/core/url-state.js": "5cd6bc5fcf217805fa463c7829441f265e77dbd98c210660b6dfbe6df238d6de",
+    "vendor/fragment-kit-v0.3.5/vendor/hashbin-sdk-v0.4.0.mjs": "82f25ffe41a0ff79a060fb593754a286e1c85c2502878ab387c3d0045b749fa5"
   },
-  "renderer": "c146356157683ba9c7736f50f2edf15fe30cdfb64b31b76845a7cc37ead41dae",
+  "renderer": "14729f1c1833980acdbe937a5d555f054b8163d92d0a2a55aefacebbc17c9168",
   "examples": {
     "damped-wave": {
       "document": "9af53827a1ff74dd3b016262e8dcdad794965588c57e3fdcdc5223c4b2832fb8",
-      "cover": "f3923a5d03b2ac26425cca58e2f9903741ff82b3588e8ae44866a49fd99ceaf1"
+      "cover": "128052e4dcebe9dd5e7abd59ffec8cffe50f8d01133ef7c45e614894d94590b1"
     },
     "functions": {
       "document": "2f47ed93e640e16beab3dcfd326bccbd6c079c823c24fc7a4bb7878eeb5ba5a8",
-      "cover": "cfd84c850124350dc91fb89ada5eb05da6fe77bdb98aab5b3c5cf19614858eae"
+      "cover": "07831a73cb2fd5fa95db436f716e0387e33f1075cfc301bed229d9e9097729d1"
     },
     "temperature": {
       "document": "978cf7888dc3e29443409e89533f892c0f33be7ede0e28b778b6a0871d8877e2",
-      "cover": "5f7c2eaec1242a6c38bef58f1e69aeff056fab367f9e39029ad427034deaf271"
+      "cover": "911ee7b2586e8c0364a5bef7659cfe61409d911b0777478d429609c7a066b53d"
     },
     "histogram": {
       "document": "78853bd3957b822968ce6ee164158a1496ea7ffedd4afc70215a79bdbf8b421b",
-      "cover": "4c25918b7af937d5adf4281f9478c9a176e13ff96e2435472ab85530432e0bdc"
+      "cover": "f51d45b5f286807d38b5f99e8573a6e168806332f4a7a63326ba6b8dbbe4637e"
     },
     "error-bars": {
       "document": "75ac864151c9beb46613e027100bc5e1c5d5b46d8eaa1a47600a201b3e7e6f98",
-      "cover": "1bc249e06a3db9916a2197f1a94336082cfbeb7e22b23be9ad2547aa18af1454"
+      "cover": "b907a73119506831f0bcf9d46226ea97a31ee3498ce86bd86fb923412f570861"
     },
     "filled-curves": {
       "document": "93b33dc1f57b90a70ffb5ce4868cdc7b7cb2eacf7fdac40e364d586a98ee6672",
-      "cover": "93c05a01864ec761027fe97c8362103037959920bcb289de7bcf58440925bac3"
+      "cover": "66602977e20cfc0bae8acc7bbb6aa97adcbdbcd5f19d0414555b44a4853bcac2"
     },
     "polar": {
       "document": "507ccd8dbcd656f0f5d422f6bfa346866f0d21d9811870031dc9ecb2175d58bb",
-      "cover": "68a7ccebc7fc52a6a696261bf1e2ca30cd0a6f2b5a2aebcd516eb2eb786ce6f0"
+      "cover": "acb4a3e9e6d9ef74eb43f5f371a5b901f1bd3c11eec303722d2a2fef4477911c"
     },
     "parametric": {
       "document": "c01a074787008e4acbf96c71e2bb4e7aa168845fd88e5480e3365f141309c88e",
-      "cover": "7421f8097ba6cd347ec55b89a13ae99c06a7b54eba54e6902330d4d6078f0f7d"
+      "cover": "a91837103c32ebe11d75be66fd3f3db4d085b90dfd5bea669134ef768c23c325"
     },
     "surface": {
       "document": "018da0283ff11c8f514def231206125e24fec88f3474b7a181c30cd28702f763",
-      "cover": "f356cf1c23675f705f215194c9d95bb1f21a770f00f8636f39ae06f289137cc8"
+      "cover": "e9cbda7f6489d920fca3be804d7a3361851ae3ae2b064ece80c46f2e5c7f13aa"
     },
     "heatmap": {
       "document": "2a1d8be5ef86a2ebd18ab8537addf8d328852e81eb97c39e2800b5a7704191b4",
-      "cover": "6bfa6d4c346d8d7f09317d5534047e1980d590b08da98ad009980e2d02c8953b"
+      "cover": "3dc6eded439b7b59d7195b58d74554e5f60bfbbd7de0204d31f2992a55cddc17"
     },
     "contours": {
       "document": "7a93bf856ad45b7d3a80dfcd0c9b68b9525e90a6223e8fcd74e74351a6cba7f7",
-      "cover": "77e7165ac13f59df9269a2de0a5ef27a488f066c8f3e8c7eab790f68734d066f"
+      "cover": "6047a2ae8f7e0361613a36170409c8bc04f4dcfefb3806cdd74854d9d9781240"
     },
     "multiplot": {
       "document": "a594132ea8cdd9c561d090553aef2657335d000a5fc4c93dbd8b24a3ee65228b",
-      "cover": "746e0aab025ee8db02c6b55c65f757cdce3397d1ed9d4e81427680906c6623c7"
+      "cover": "30ebfcb82684e7efdbe9f262ef3ba1726ef7e4aebe7689f59a99453cf63b2ffe"
     },
     "time-series": {
       "document": "b8a251a6b3efe736c74dcd9a80b0634a793ec513fec4bb3508db36b0a5ee6cd9",
-      "cover": "15bf671c6219c96d0780c7a57823a4c7ac1f48d0156b22923c3c46a7559542c4"
+      "cover": "06e0aa694e1b91d66b1061f41eb52ca58112f8b2e913e1b440a744bd5f4a083a"
     },
     "fitting": {
       "document": "120a1687f1984c7da095dbb0d1cddf778ff79ea47d35e85faacde2ed5f781903",
-      "cover": "333bba75ee47d3d390ed2a4031f92099a437789ff35c7d7e396fb8905b34819f"
+      "cover": "e6a2652441957758908e7128c176f8975a589ef8100a1dbde07add2b899f7f56"
     },
     "vectors": {
       "document": "c106999ade88166eb011ac7a93f2cca7d983c6555960e8fa058cd2efbfdf8100",
-      "cover": "ea7f349bbff7c9194d56ace3ed83554d58f92bafd9b5bdad3e7c5257079a02fe"
+      "cover": "381a7e746529e786964a959e21c2fede234c5ddde7701a3e59993246b75cb372"
     },
     "annotations": {
       "document": "19b2ae2d7e087d0b756d47d0ee0297c084f4c97653a63a67e9791d3ffa74486d",
-      "cover": "a828313009137c1480a94375178cc51ec66ce150e0eebcedd85fac351b436e61"
+      "cover": "722b8dbc71433b21b57e473cd7bff91f2a6fd4abfe98327ddfd4973f34f3896d"
     }
   }
 }
