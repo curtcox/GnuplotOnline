@@ -12,7 +12,7 @@ test('read-first rollout writes legacy URLs and accepts v1 documents with files'
   const before={src:"plot 'data.dat'",files:{'data.dat':'1 2'},gnuplot:{width:640,height:480,background:'transparent'}};
   const link=urlState.build(before,{url:'https://gnuplot.hashbin.page/?example=stale',run:false});assert.ok(new URL(link.href).searchParams.has('doc'));
   assert.equal(urlState.parse(link.href).run,false);assert.deepEqual(urlState.parse(link.href).doc,type.normalize(before));
-  const {createUrlState}=require('../vendor/fragment-kit-v0.3.5/src/index.js');const {config}=require('../src/fragment-config.mjs');
+  const {createUrlState}=require('../vendor/fragment-kit-v0.4.3/src/index.js');const {config}=require('../src/fragment-config.mjs');
   const modern=createUrlState({config,type}).build(before).href;assert.deepEqual(urlState.parse(modern).doc,type.normalize(before));
   assert.throws(()=>HashBinDocuments.parse('{"format":"hashbin-diagram","type":"other","version":1,"src":"plot x"}'),/Saved document is for/);
 });

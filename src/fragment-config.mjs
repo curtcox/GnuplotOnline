@@ -1,6 +1,6 @@
 import * as Core from './gnuplot-core.js';
 import * as Files from './data-files.js';
-import { createConfig, createUrlState, HashBinStore as Store, createStorage, compress, decompress } from '../vendor/fragment-kit-v0.3.5/src/index.js';
+import { createConfig, createUrlState, HashBinStore as Store, createStorage, compress, decompress } from '../vendor/fragment-kit-v0.4.3/src/index.js';
 const GnuplotCore = Core.default ?? globalThis.GnuplotCore;
 const DataFiles = Files.default ?? globalThis.DataFiles;
 import appConfig from '../fragment-kit.config.json' with { type: 'json' };
@@ -43,3 +43,6 @@ export function publishTransactions(storage,clientId=config.hashbinClientId){
 }
 export class HashBinStore extends Store { constructor(options = {}) { let storage;try{storage=globalThis.sessionStorage;}catch{}super({ config, type,transactionStorage:publishTransactions(storage,options.clientId??config.hashbinClientId), ...options }); } }
 export { compress, decompress };
+
+// AI is a separate opt-in entry point; document loading never creates a connection.
+type.ai={"describe":"Gnuplot script src. Preserve plot dimensions, background and data files. Render uses a fresh isolated WASM worker; accepted code waits for explicit Render.","paths":["/src"]};

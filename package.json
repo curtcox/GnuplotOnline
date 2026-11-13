@@ -7,7 +7,8 @@
     "test:browser": "node tests/browser/all.cjs",
     "previews": "node scripts/render-gallery.mjs",
     "check": "node scripts/check.mjs",
-    "test:urls": "node tests/browser/url-state.cjs"
+    "test:urls": "node tests/browser/url-state.cjs",
+    "test:ai:browser": "node tests/browser/ai.mjs"
   },
   "devDependencies": {
     "@playwright/test": "1.64.1",

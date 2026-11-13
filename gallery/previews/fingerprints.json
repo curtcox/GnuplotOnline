@@ -10,8 +10,8 @@
     "src/gnuplot-core.js": "8460e8e5b7eec0666dfc44139139a17ecf00d027eded30b1b16a5f18885647c4",
     "vendor/gnuplot/gnuplot.js": "72fbcf1029670ea7453eafacefbff36f3c21a8a42b15fae9030144344425f7b2",
     "vendor/gnuplot/gnuplot.wasm": "b100192974f908250b67c02d1131e270b74e74bc8f80fab1d2fd1adaf0f3fbe0",
-    "vendor/fragment-kit-v0.3.5/src/core/url-state.js": "5cd6bc5fcf217805fa463c7829441f265e77dbd98c210660b6dfbe6df238d6de",
-    "vendor/fragment-kit-v0.3.5/vendor/hashbin-sdk-v0.4.0.mjs": "82f25ffe41a0ff79a060fb593754a286e1c85c2502878ab387c3d0045b749fa5"
+    "vendor/fragment-kit-v0.4.3/src/core/url-state.js": "5cd6bc5fcf217805fa463c7829441f265e77dbd98c210660b6dfbe6df238d6de",
+    "vendor/fragment-kit-v0.4.3/vendor/hashbin-sdk-v0.4.0.mjs": "82f25ffe41a0ff79a060fb593754a286e1c85c2502878ab387c3d0045b749fa5"
   },
   "renderer": "14729f1c1833980acdbe937a5d555f054b8163d92d0a2a55aefacebbc17c9168",
   "examples": {

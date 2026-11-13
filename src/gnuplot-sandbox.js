@@ -1,7 +1,7 @@
 /* Plotting runs with an opaque origin, separate from the editor's storage and service worker. */
 (() => {
 const GnuplotSandbox = {
-  factory({ loadSDK = () => import('../vendor/fragment-kit-v0.3.5/vendor/hashbin-sdk-v0.4.0.mjs'),
+  factory({ loadSDK = () => import('../vendor/fragment-kit-v0.4.3/vendor/hashbin-sdk-v0.4.0.mjs'),
     base = new URL('src/', location.href).href,
     fetchSource = url => fetch(url).then(response => {
       if (!response.ok) throw new Error('Could not load the plotting sandbox. Reload and try again.');

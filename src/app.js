@@ -1,8 +1,10 @@
+import {mountClientAi,aiCallback} from './ai-client.js';
+if(aiCallback()) await new Promise(()=>{});
 import { LocalDrafts, RenderScheduler, HashBinPanel, ShareClient, compactShell,createShell, mountMobileTabs,
-  createQrDialog, createShareDialog } from '../vendor/fragment-kit-v0.3.5/src/index.js';
+  createQrDialog, createShareDialog } from '../vendor/fragment-kit-v0.4.3/src/index.js';
 import { config, type, urlState, HashBinDocuments, HashBinStore, compress, decompress } from './fragment-config.mjs';
 // Keep legacy test/document entry points during this migration; production uses imports.
-import * as Kit from '../vendor/fragment-kit-v0.3.5/src/index.js';
+import * as Kit from '../vendor/fragment-kit-v0.4.3/src/index.js';
 Object.assign(globalThis, { HashBinDocuments: { ...HashBinDocuments, ...Object.fromEntries(['isCID','cidLength','bytes','encode64','decode64','verify'].map(key => [key, Kit[key]])) },
   LZString: { compressToEncodedURIComponent: compress, decompressFromEncodedURIComponent: decompress } });
 /* Browser glue. The engine, documents and exports stay independent of the UI. */
@@ -16,11 +18,12 @@ Object.assign(globalThis, { HashBinDocuments: { ...HashBinDocuments, ...Object.f
   ace.require('ace/ext/language_tools').addCompleter({ getCompletions(_editor, _session, _position, _prefix, callback) {
     callback(null, 'plot splot set unset reset fit stats do for while if else print pause replot title xlabel ylabel xrange yrange zrange grid key terminal output samples isosamples multiplot polar parametric palette pm3d using with lines points linespoints boxes histograms yerrorbars filledcurves vectors image sin cos exp log sqrt'.split(' ').map(value => ({ caption: value, value, meta: 'gnuplot', score: 800 })));
   } });
+  let aiUI=null,aiHold=false;
   let files = new DataFiles(), settings = GnuplotCore.options(), revision = 0, applying = false, result = null, pan = null;
   let saved = null, persistTimer, editingName = null, pendingQrSave = false, autorun = true;
   const snapshot = () => ({ src: editor.getValue(), gnuplot: { width: settings.width, height: settings.height, background: settings.background }, files: files.snapshot() });
   const fingerprint = () => JSON.stringify(snapshot());
-  const links = () => urlState.build(snapshot());
+  const links = () => urlState.build(snapshot(),{run:!aiHold&&autorun});
   const currentLink = () => saved?.fingerprint === fingerprint() ? saved.link : links().fallback;
   const safeStorage = name => { try { return window[name]; } catch (_) { return undefined; } };
   const local = safeStorage('localStorage');
@@ -101,7 +104,7 @@ Object.assign(globalThis, { HashBinDocuments: { ...HashBinDocuments, ...Object.f
      $('cancel').hidden = true; $('status').textContent = 'Waiting for edits…';
     clearTimeout(persistTimer);
     persistTimer = setTimeout(() => { persist(); refreshShare({ address: true }); }, 180);
-    scheduler.schedule({ detect: false });
+    if(!aiHold)scheduler.schedule({ detect: false });
     $('file-count').textContent = Object.keys(files.files).length;
   }
   function syncOptions() {
@@ -110,7 +113,8 @@ Object.assign(globalThis, { HashBinDocuments: { ...HashBinDocuments, ...Object.f
     $('size').value = [...$('size').options].some(option => option.value === preset) ? preset : 'custom';
     $('custom-size').hidden = $('size').value !== 'custom';
   }
-  function apply(doc, { run = true } = {}) {
+  function apply(doc, { run = true, fromAi = false } = {}) {
+    if(!fromAi){aiUI?.cancel();aiHold=false;}
     clearTimeout(persistTimer); urlState.cancel(); shareClient.cancel(); drafts.opened();
     const nextFiles = new DataFiles(doc.files || {}); DataFiles.validate(nextFiles.files, doc.src);
     applying = true;
@@ -152,7 +156,7 @@ Object.assign(globalThis, { HashBinDocuments: { ...HashBinDocuments, ...Object.f
   // Closing the snapshot approval also cancels the pending QR handoff.
   hashbin.dialog.addEventListener('close', () => { pendingQrSave = false; });
   editor.session.on('change', changed);
-  $('render').onclick = () => { scheduler.cancel(); render(); };
+  $('render').onclick = () => { aiHold=false; scheduler.cancel(); render(); };
   $('cancel').onclick = () => { revision++; scheduler.cancel(); client.cancel(); $('cancel').hidden = true; $('status').textContent = 'Cancelled'; };
   $('size').onchange = () => {
     $('custom-size').hidden = $('size').value !== 'custom';
@@ -259,6 +263,7 @@ Object.assign(globalThis, { HashBinDocuments: { ...HashBinDocuments, ...Object.f
   window.addEventListener('pagehide', persist);
   window.addEventListener('offline-before-reload', persist);
   async function loadUrl({ initial = false } = {}) {
+    aiUI?.cancel();aiHold=false;
     hashbin.cancelLoad();
     try {
       clearTimeout(persistTimer); scheduler.cancel(); client.cancel(); revision++; saved = null;
@@ -293,5 +298,6 @@ Object.assign(globalThis, { HashBinDocuments: { ...HashBinDocuments, ...Object.f
   let lastNavigation = location.href;
   const navigate = event => { if (event.type === 'hashchange' && event.newURL !== location.href) return; if (location.href === lastNavigation) return; lastNavigation = location.href; void loadUrl(); };
   window.addEventListener('hashchange', navigate); window.addEventListener('popstate', navigate);
+  aiUI=await mountClientAi({config,type,urlState,getSnapshot:snapshot,getFingerprint:fingerprint,container:shell.drawer.body,toolbar:document.querySelector('.toolbar'),status:message=>$('status').textContent=message,onApply:doc=>{aiHold=true;apply(doc,{run:false,fromAi:true});persist(true);refreshShare({address:true});$('status').textContent='Change accepted — press Render.';}});
   await loadUrl({ initial: true });
 })();
