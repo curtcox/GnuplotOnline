@@ -1,19 +1,19 @@
 {
   "dependencies": {
-    "index.html": "3b14f76b9a322feffadf35e9eadd790d4dd58e243c8b6bbbdfef33abe3537064",
-    "fragment-kit.config.json": "fd13349414b57eb321ff615a6afd40a43f189ff735dba3eff18ce93b58cf11ec",
-    "src/gnuplot-sandbox.js": "d6a50ec3a75f3db152d752dd2083e0cb4455d125df9be36e11b22f4ac2556b3c",
-    "src/app.js": "852ff2854fb66cb9d95b4117cfc058dfab2b930cf1b9a8652b0b43da97103c3a",
+    "index.html": "bc1ac3ff49fe62d916186f6a8df4234d9fcb504929661ac05dfa1fc542ab6273",
+    "fragment-kit.config.json": "122c5a069913e4b57b228f888932d23265247c0184fb12da2dda703ca62c3b73",
+    "src/gnuplot-sandbox.js": "6650ceb5b5e4d7287f7e45d91e38fdbaaa22acdca04302f6eb0ab953525a4b99",
+    "src/app.js": "c9a259471e0525b4f4658153dd51c4ac85d1f9d6b4519f53d7b966282f18838a",
     "src/app.css": "baece7e8c7d1abbdb65bb2f768f0eb8cf241fe668b97e9ae5b4947c1b1255806",
-    "src/fragment-config.mjs": "2fdeb8f40e2696aa3ea534664963e15c83178b5a50dfc19cdb087f691b01fed4",
+    "src/fragment-config.mjs": "d11b58f7d2532935d99531f1cc6624f19e2b9f0ee8141ca9278146e3a3ec0264",
     "src/examples.js": "d87eb3d4dcdaf7eea49e505d218e230ccad835d2c91496a9188c2bb977823a62",
     "src/gnuplot-core.js": "8460e8e5b7eec0666dfc44139139a17ecf00d027eded30b1b16a5f18885647c4",
     "vendor/gnuplot/gnuplot.js": "72fbcf1029670ea7453eafacefbff36f3c21a8a42b15fae9030144344425f7b2",
     "vendor/gnuplot/gnuplot.wasm": "b100192974f908250b67c02d1131e270b74e74bc8f80fab1d2fd1adaf0f3fbe0",
-    "vendor/fragment-kit-v0.4.3/src/core/url-state.js": "5cd6bc5fcf217805fa463c7829441f265e77dbd98c210660b6dfbe6df238d6de",
+    "vendor/fragment-kit-v0.4.3/src/core/url-state.js": "ce78a70728b4d28a19570d84d0edd3a7ee338e8e6844f170221ae6048d9cf0b7",
     "vendor/fragment-kit-v0.4.3/vendor/hashbin-sdk-v0.4.0.mjs": "82f25ffe41a0ff79a060fb593754a286e1c85c2502878ab387c3d0045b749fa5"
   },
-  "renderer": "14729f1c1833980acdbe937a5d555f054b8163d92d0a2a55aefacebbc17c9168",
+  "renderer": "5419ae32e3634bfb562aa43f9f74ca6e22942b787d67e1c43e292186e09ea4bd",
   "examples": {
     "damped-wave": {
       "document": "9af53827a1ff74dd3b016262e8dcdad794965588c57e3fdcdc5223c4b2832fb8",
