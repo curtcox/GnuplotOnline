@@ -1,6 +1,6 @@
 import * as Core from './gnuplot-core.js';
 import * as Files from './data-files.js';
-import { createConfig, createUrlState, HashBinStore as Store, createStorage, compress, decompress } from '../vendor/fragment-kit-v0.4.3/src/index.js';
+import { createConfig, createUrlState, HashBinStore as Store, createStorage, compress, decompress } from '../vendor/fragment-kit-v0.5.0/src/index.js';
 const GnuplotCore = Core.default ?? globalThis.GnuplotCore;
 const DataFiles = Files.default ?? globalThis.DataFiles;
 import appConfig from '../fragment-kit.config.json' with { type: 'json' };

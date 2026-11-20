@@ -17,4 +17,4 @@ repair.onclick = async () => { try { await client.repair(); } catch { status.tex
 client.init().catch(() => { status.textContent = 'Offline setup incomplete'; action.hidden = false; });
 
 }
-import { OfflineClient } from '../vendor/fragment-kit-v0.4.3/src/index.js';
+import { OfflineClient } from '../vendor/fragment-kit-v0.5.0/src/index.js';

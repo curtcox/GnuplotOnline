@@ -15,8 +15,8 @@
     "gallery/previews",
     "icons",
     "vendor/gnuplot",
-    "vendor/fragment-kit-v0.4.3/src",
-    "vendor/fragment-kit-v0.4.3/vendor",
+    "vendor/fragment-kit-v0.5.0/src",
+    "vendor/fragment-kit-v0.5.0/vendor",
     "fragment-kit.config.json",
     "ai-suite.json",
     "ai-comparison.json"

@@ -8,4 +8,4 @@ for (const file of ['offline-assets.js','service-worker.js']) { const result=spa
 const result=spawnSync(process.execPath,['scripts/update-offline.mjs','--check'],{stdio:'inherit'});if(result.status)process.exit(result.status);
 
 const gallery=spawnSync(process.execPath,['scripts/render-gallery.mjs','--check'],{stdio:'inherit'});if(gallery.status)process.exit(gallery.status);
-const kit=spawnSync(process.execPath,['vendor/fragment-kit-v0.4.3/tools/check.mjs','--config','fragment-kit.config.json'],{stdio:'inherit'});process.exit(kit.status);
+const kit=spawnSync(process.execPath,['vendor/fragment-kit-v0.5.0/tools/check.mjs','--config','fragment-kit.config.json'],{stdio:'inherit'});process.exit(kit.status);

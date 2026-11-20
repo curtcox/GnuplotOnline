@@ -1,10 +1,10 @@
 import {mountClientAi,aiCallback} from './ai-client.js';
 if(aiCallback()) await new Promise(()=>{});
 import { LocalDrafts, RenderScheduler, HashBinPanel, ShareClient, compactShell,createShell, mountMobileTabs,
-  createQrDialog, createShareDialog } from '../vendor/fragment-kit-v0.4.3/src/index.js';
+  createQrDialog, createShareDialog, openLibrary, createLibraryPanel } from '../vendor/fragment-kit-v0.5.0/src/index.js';
 import { config, type, urlState, HashBinDocuments, HashBinStore, compress, decompress } from './fragment-config.mjs';
 // Keep legacy test/document entry points during this migration; production uses imports.
-import * as Kit from '../vendor/fragment-kit-v0.4.3/src/index.js';
+import * as Kit from '../vendor/fragment-kit-v0.5.0/src/index.js';
 Object.assign(globalThis, { HashBinDocuments: { ...HashBinDocuments, ...Object.fromEntries(['isCID','cidLength','bytes','encode64','decode64','verify'].map(key => [key, Kit[key]])) },
   LZString: { compressToEncodedURIComponent: compress, decompressFromEncodedURIComponent: decompress } });
 /* Browser glue. The engine, documents and exports stay independent of the UI. */
@@ -100,7 +100,7 @@ Object.assign(globalThis, { HashBinDocuments: { ...HashBinDocuments, ...Object.f
   }
   function changed() {
     if (applying) return;
-    revision++; client.cancel(); hashbin.cancelLoad(); urlState.cancel(); shareClient.cancel(); saved = null; persist(true);
+    revision++; client.cancel(); hashbin.cancelLoad(); libraryPanel?.cancelLoad(); urlState.cancel(); shareClient.cancel(); saved = null; persist(true);
      $('cancel').hidden = true; $('status').textContent = 'Waiting for edits…';
     clearTimeout(persistTimer);
     persistTimer = setTimeout(() => { persist(); refreshShare({ address: true }); }, 180);
@@ -136,21 +136,28 @@ Object.assign(globalThis, { HashBinDocuments: { ...HashBinDocuments, ...Object.f
   const extra = $('extra-tools'); shell.drawer.body.append(extra); extra.classList.add('kit-tools');
   for (const id of ['hashbin-save','hashbin-load','hashbin-cid','hashbin-status','hashbin-dialog','qr-dialog']) $(id).remove();
   const store = new HashBinStore({ legacyStorage: local });
+  let libraryPanel = null;
   const hashbin = new HashBinPanel({ store, urlState, container: extra, getSnapshot: snapshot, getFingerprint: fingerprint,
-    onLoad: (doc, cid) => { apply(doc, {run:autorun}); const link = cid ? urlState.link(location.href, cid) : links().href; saved = cid ? { fingerprint: fingerprint(), link } : null; history.replaceState(null, '', link); refreshShare(); },
+    onLoad: async (doc, cid) => { apply(doc, {run:autorun}); const link = cid ? urlState.link(location.href, cid) : links().href; saved = cid ? { fingerprint: fingerprint(), link } : null; history.replaceState(null, '', link); refreshShare();
+      await libraryPanel?.opened(doc, cid ? { kind: 'cid', source: cid } : { record: false }); },
+    onDetached: result => { void libraryPanel?.published(result); },
     onSaved: (_cid, value, link) => {
       clearTimeout(persistTimer); urlState.cancel(); saved = { fingerprint: value, link }; history.replaceState(null, '', link); refreshShare();
       if (pendingQrSave) { pendingQrSave = false; hashbin.dialog.close(); qr.open(link); }
     } });
+  const library = await openLibrary({ config, type }).catch(error => { $('status').textContent = error.message; return null; });
+  if (library) libraryPanel = createLibraryPanel({ library, store, urlState, getSnapshot: snapshot, getFingerprint: fingerprint,
+    container: document.querySelector('.toolbar'), drafts,
+    onLoad: doc => { hashbin.cancelLoad(); apply(doc, { run: false }); refreshShare({ address: true }); $('status').textContent = 'Library revision loaded — press Render.'; } });
   const openSave = () => hashbin.openSave();
   hashbin.saveButton.onclick = openSave;
   const shareDialog = createShareDialog({ urlState, getSnapshot: snapshot, onSave: openSave });
   const qr = createQrDialog({ config, urlState, onLoad: async outcome => {
     shell.drawer.dialog.close();
     if (outcome.kind === 'cid') await hashbin.load(outcome.cid);
-    else { const parsed = outcome.intent; autorun = parsed.run; if (parsed.kind === 'source') { hashbin.cancelLoad(); apply(parsed.doc, { run: parsed.run }); refreshShare({ address: true }); }
+    else { const parsed = outcome.intent; autorun = parsed.run; if (parsed.kind === 'source') { hashbin.cancelLoad(); apply(parsed.doc, { run: parsed.run }); refreshShare({ address: true }); void libraryPanel?.opened(parsed.doc, { kind: 'link' }); }
       else if (parsed.kind === 'cid') await hashbin.load(parsed.cid);
-      else if (parsed.kind === 'example') { const sample = GnuplotExamples.catalog.find(item => item.id === parsed.id); if (!sample) throw new Error('Unknown example.'); hashbin.cancelLoad(); apply({ src: sample.source, files: sample.files || {} }, { run: parsed.run }); refreshShare({ address: true }); }
+      else if (parsed.kind === 'example') { const sample = GnuplotExamples.catalog.find(item => item.id === parsed.id); if (!sample) throw new Error('Unknown example.'); hashbin.cancelLoad(); const doc = { src: sample.source, files: sample.files || {} }; apply(doc, { run: parsed.run }); refreshShare({ address: true }); void libraryPanel?.opened(doc, { record: false }); }
     }
   }, onSave: () => { pendingQrSave = true; qr.dialog.close(); openSave(); } });
   // Closing the snapshot approval also cancels the pending QR handoff.
@@ -259,12 +266,12 @@ Object.assign(globalThis, { HashBinDocuments: { ...HashBinDocuments, ...Object.f
   $('file-upload').onchange = async event => { await upload(event.target.files); event.target.value = ''; };
   $('editor-pane').addEventListener('dragover', event => { if (event.dataTransfer.types.includes('Files')) event.preventDefault(); });
   $('editor-pane').addEventListener('drop', event => { if (event.dataTransfer.files.length) { event.preventDefault(); event.stopPropagation(); upload(event.dataTransfer.files); } }, true);
-  drafts.mount($('extra-tools'), doc => { hashbin.cancelLoad(); apply(doc, { run: false }); refreshShare({ address: true }); $('status').textContent = 'Saved work restored — press Render.'; });
+  drafts.mount($('extra-tools'), doc => { hashbin.cancelLoad(); apply(doc, { run: false }); refreshShare({ address: true }); $('status').textContent = 'Saved work restored — press Render.'; void libraryPanel?.opened(doc, { record: false }); });
   window.addEventListener('pagehide', persist);
   window.addEventListener('offline-before-reload', persist);
   async function loadUrl({ initial = false } = {}) {
     aiUI?.cancel();aiHold=false;
-    hashbin.cancelLoad();
+    hashbin.cancelLoad(); libraryPanel?.cancelLoad();
     try {
       clearTimeout(persistTimer); scheduler.cancel(); client.cancel(); revision++; saved = null;
       drafts.opened();
@@ -272,25 +279,23 @@ Object.assign(globalThis, { HashBinDocuments: { ...HashBinDocuments, ...Object.f
       const loadRevision = revision;
       const parsed = urlState.parse(location.href); autorun = parsed.run;
       if (parsed?.kind === 'publish') {
-        const published = await store.published(location.hash);
-        // Edits made while the return was verified win over it.
-        const current = loadRevision === revision;
-        if (published?.snapshot && current) apply(published.snapshot);
-        if (published?.cid && current) saved = { fingerprint: fingerprint(), link: HashBinDocuments.link(location.href, published.cid) };
-        if (saved) history.replaceState(null, '', saved.link); else refreshShare({ address: true });
-        $('hashbin-status').textContent = published?.error || 'Saved to HashBin.';
-      } else if (parsed.kind === 'source') apply(parsed.doc, { run: parsed.run });
+        // Edits made while the return was verified win over it. Detached
+        // library/revision callbacks restore the snapshot and report onDetached.
+        const published = await hashbin.published(location.hash);
+        if (published && !published.kind && !published.error) $('hashbin-status').textContent = 'Saved to HashBin.';
+      } else if (parsed.kind === 'source') { apply(parsed.doc, { run: parsed.run }); void libraryPanel?.opened(parsed.doc, { kind: 'link' }); }
       else if (parsed?.kind === 'example') {
         const sample = GnuplotExamples.catalog.find(item => item.id === parsed.id);
         if (!sample) throw new Error('Unknown example. Choose a sample from the gallery.');
         const doc = { src: sample.source, files: sample.files || {} };
         apply(doc, { run: parsed.run }); refreshShare({ address: true });
+        void libraryPanel?.opened(doc, { record: false });
       } else if (parsed?.kind === 'cid') {
         await hashbin.load(parsed.cid);
         if (loadRevision === revision && hashbin.status.textContent !== 'Loaded from HashBin.') { setError(hashbin.status.textContent); $('status').textContent = hashbin.status.textContent; }
         return;
       }
-      if (parsed.kind === 'none') { const params = new URL(location.href).searchParams; apply({ src: GnuplotExamples.defaultSource, gnuplot: { width: params.get('w') || 800, height: params.get('h') || 600, background: params.get('bg') } }, {run:parsed.run}); }
+      if (parsed.kind === 'none') { const params = new URL(location.href).searchParams; const doc = { src: GnuplotExamples.defaultSource, gnuplot: { width: params.get('w') || 800, height: params.get('h') || 600, background: params.get('bg') } }; apply(doc, {run:parsed.run}); void libraryPanel?.opened(doc, { record: false }); }
       refreshShare();
     } catch (error) { setError(error.message); $('status').textContent = error.message; }
     finally { document.body.dataset.ready = 'true'; }
@@ -298,6 +303,6 @@ Object.assign(globalThis, { HashBinDocuments: { ...HashBinDocuments, ...Object.f
   let lastNavigation = location.href;
   const navigate = event => { if (event.type === 'hashchange' && event.newURL !== location.href) return; if (location.href === lastNavigation) return; lastNavigation = location.href; void loadUrl(); };
   window.addEventListener('hashchange', navigate); window.addEventListener('popstate', navigate);
-  aiUI=await mountClientAi({config,type,urlState,getSnapshot:snapshot,getFingerprint:fingerprint,container:shell.drawer.body,toolbar:document.querySelector('.toolbar'),status:message=>$('status').textContent=message,onApply:doc=>{aiHold=true;apply(doc,{run:false,fromAi:true});persist(true);refreshShare({address:true});$('status').textContent='Change accepted — press Render.';}});
+  aiUI=await mountClientAi({config,type,urlState,getSnapshot:snapshot,getFingerprint:fingerprint,container:shell.drawer.body,toolbar:document.querySelector('.toolbar'),status:message=>$('status').textContent=message,onApply:doc=>{aiHold=true;apply(doc,{run:false,fromAi:true});persist(true);refreshShare({address:true});$('status').textContent='Change accepted — press Render.';void libraryPanel?.opened(doc,{record:false});}});
   await loadUrl({ initial: true });
 })();
